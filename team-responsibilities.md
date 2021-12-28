@@ -15,5 +15,14 @@ Others:
 - Hardware security module
 - Ardana tenant Nix expression
 
+# Doing
+
+- Athan: Invariant equation solver
+- Tommy: Setting up basic E2E testing framework
+- Matthew: Figuring out the genesis transaction generation to set up a more
+  complex E2E testing framework
+- Oleg: 
+- Nick: Move Stats to a stack-based project
+
 
 
