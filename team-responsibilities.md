@@ -4,6 +4,8 @@ DEX:
 - Invariant equation solver RESTful API
 - Link DEX with Stats & rollups, to store the states correctly
 - DEX Admin API
+- Create a non-stablecoin DEX, i.e. implement the invariant equation and solver
+  for a non-stablecoin invariant equation
 
 Stablecoin:
 - Price oracle off-chain code
