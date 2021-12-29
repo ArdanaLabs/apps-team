@@ -39,6 +39,14 @@ of the total dUSD amount (probably a governance-set parameter).
 In a debt auction, the governance token is minted and sold (thus diluting the
 supply) for the dUSD which is then burned.
 
+This is all part of the MakerDAO system. Unfortunately, Ardana governance tokens
+(exDANA) cannot be minted. Not even DANA can be minted ad infinum. This means
+that we need an alternative to the debt auction system (and possibly the surplus
+auction system as well?). The alternative is to put together a buffer, filled
+with part of the stability fee profits, and to use that to buy back dUSD and
+burn it when necessary, i.e. when the amount of dUSD in circulation is bigger
+than the amount that is backed by vaults.
+
 ## Surplus auction
 
 Surplus auctions are the reverse of debt auctions: if the protocol accumulated
