@@ -4,13 +4,15 @@ DEX:
 - Invariant equation solver RESTful API
 - Link DEX with Stats & rollups, to store the states correctly
 - DEX Admin API
-- Create a non-stablecoin DEX, i.e. implement the invariant equation and solver
-  for a non-stablecoin invariant equation
+- Create a second DEX to exchange ADA with dUSD
+  * Research a good invariant equation, implement the equation and solver
 
 Stablecoin:
 - Price oracle off-chain code
-- Arbitrage bot
-- Stablecoin off-chain code
+- Vault off-chain code
+- dUSD Admin API: Adjust parameters, trigger protocol-wide actions, treasury
+  (and buffer) to hold governance-owned assets
+- Vault liquidation arbitrage bot
 
 Others:
 - Maeserat & E2E testing
