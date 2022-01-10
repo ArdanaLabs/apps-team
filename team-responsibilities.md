@@ -18,6 +18,7 @@ Others:
 - Maeserat & E2E testing
 - Hardware security module
 - Ardana tenant Nix expression
+- Merge repos into a birepo: One haskell.nix repo, one non-haskell.nix repo
 
 # Doing
 
@@ -25,7 +26,7 @@ Others:
 - Tommy: Setting up basic E2E testing framework
 - Matthew: Figuring out the genesis transaction generation to set up a more
   complex E2E testing framework
-- Oleg: 
+- Oleg: Hardware security module
 - Nick: Move Stats to a stack-based project
 
 
