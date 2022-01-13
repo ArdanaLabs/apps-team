@@ -36,10 +36,20 @@ Others:
 
 - Athan: Invariant equation solver
 - Tommy: Setting up basic E2E testing framework
-- Matthew: Figuring out the genesis transaction generation to set up a more
-  complex E2E testing framework
+- Matthew: Genesis transaction generation for more complex E2E testing framework
 - Oleg: Hardware security module
 - Nick: Understand the current status of the dUSD project
+
+# Blocked
+
+- YubiHSM2 server access
+- Genesis transaction generation
+- Nix issue with the basic E2E testing framework
+- The smart contracts team is ready to implement on-chain code
+  * Set up a test to make sure on-chain and off-chain match
+  * Set up designs for each component: DEX, DEX Admin, price oracle, vault,
+    buffer, dUSD Admin
+- Invariant equation: What is the goal of the non-stablecoin DEXes at launch?
 
 
 

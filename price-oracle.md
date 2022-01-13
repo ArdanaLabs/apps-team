@@ -1,4 +1,4 @@
-# Price oracle bot
+# Price oracle
 
 The price oracle bot needs to pull the exchange rate between USD and ADA (or
 other collateral/pegged currency price) from an external source (some kind of
