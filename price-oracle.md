@@ -17,12 +17,14 @@ Current status:
 - Single, private-key oracle. It hasn't been decided yet where that price
   could/would come from.
 
-# How the price oracle gets updated
+# How the price oracle gets updated and identified
 
-The creator of the price oracle can update it, his public key identifying the
-oracle.
+The creator of the price oracle can update it, his public key identifying him as
+the person allowed to update the oracle.
 
-Q: Does this mean one wallet can only create one price oracle?
+Price oracles themselves will be identified by an NFT or TxOutRef (from their
+creation), to asure one wallet can create multiple price oracles. (If the
+wallet's public key is used to identify price oracles, only one can be created.)
 
 # Price oracle sources
 
@@ -42,47 +44,49 @@ Option 2. Multiple sources
 + Flexibility towards the future: Add/remove price oracles to keep the system
   trusted
 
+Proposal: Each price oracle is recommended to only use one source (though this
+off-chain code, and hence cannot be enforced). The dUSD ecosystem takes the
+median of multiple price oracles, to reduce exposure to price manipulations.
+
 # Price delay
 
-Option 1. Delay by a certain time period & allow governance to block an oracle
-+ Protection against manipulation
-- If the price crashes, liquidations might not happen in time
-
-Option 2. Don't delay
-
-Option 3. Only delay in case of heavy price fluctuations
-
-Option 4. Use exponential delay
-  * `p_used = (1 - a) * p(t) + a * p(t')` where `p(t)` is the price at time `t`
-    and `a = e^{t'-t}`
+Should we add a delay in the prices?
+- Delays are needed to allow governance to defend against price manipulations
+- Delays could lead to liquidation trouble if the price of the collateral drops
 
 Questions:
 - How common is manipulation on MakerDAO? How impactful?
 - How necessary is a sense of smearing the price out, so as to avoid very short
   term fluctuations being abused?
 - How big of a problem have price crashes been for MakerDAO?
+  * Related to network congestion and lack of liquidation bot instances
+  * Liquidation auctions are dangerous, if there aren't enough people/bots
+    bidding
+
+Proposals:
+- Algorithmic liquidation: Liquidation price is set to be a small discount
+  compared to the price oracles' price
+- Delay by 1h, to avoid price manipulation issues
+  * Price crashes don't matter anyway if the collateral's price goes up again
+  * If the price doesn't go up again, 
+- Price smearing (i.e. using moving averages of the price from a given source)
+  will be left up to the price oracle's off-chain code
+  * Enforced by governance judging each specific oracle to (not) let it into the
+    list of used oracles
 
 # Oracle security module
 
+The OSM is a smart contract which tracks a list of governance-allowed price
+oracles, and outputs the currently accepted price within the dUSD ecosystem with
+a 1 hour delay. One OSM exists per collateral asset class.
 https://docs.makerdao.com/smart-contract-modules/oracle-module/oracle-security-module-osm-detailed-documentation
-The only purpose of the Oracle Security Module in MakerDAO seems to be delaying
-the price by 1 hour.
 
-If we are implementing this it needs to go on-chain, if that is off-chain code
-there is no way to tell if the price actually was delayed.
-
-Option 1. Yes
-+ In MakerDAO this gives time to react to price manipulations
-- Harder to implement
-- In an event of an actual price crash the liquidators cannot
-  get the value they would do otherwise (the collateral they
-  are buying is worth less now)
-
-Option 2. No
+We need this in order to actually implement the merging of multiple price
+oracles, tracking which oracles are accepted, and add the delay.
 
 # If there are multiple oracles, who decides which ones to add?
 
-Governance decides. We can't think of another option.
+Governance decides.
 
 # How to interact with the price oracle
 
@@ -91,12 +95,25 @@ Option 1. PAB
 + An E2E testing framework to run against the PAB is currently being set up
 - The PAB is not working with actual networks right now (testnet and mainnet)
   and it is not known when it will be ready
+- Requires us to wait for IOHK to build a dApp store
 
 Option 2. Purescript-based project
   * https://github.com/Plutonomicon/cardano-browser-tx
 + Can run directly in the browser
 - Early-stage project
 - PS compiles to JS, which doesn't have anything that can represent moneys
+
+# How to turn multiple prices into one
+
+Option 1. Take the median.
+
+Do we want to go more complex than this? E.g. if the distribution of prices is
+seriously out of wack (e.g. 40% says the price is double what the other 60%
+says), stop updating the prices? Would this actually be helpful in a crisis
+situation?
+
+# Do we want to add emergency shutdown?
+
 
 # Earlier MakerDAO architecture
 
