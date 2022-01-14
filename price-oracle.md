@@ -115,6 +115,10 @@ situation?
 # Do we want to add emergency shutdown?
 
 
+# Do we want to use read-only UTXOs?
+
+See CIP-31. Might take a while to be on mainnet.
+
 # Earlier MakerDAO architecture
 
 The biggest difference between modern and initial MakerDAO is that initially it
