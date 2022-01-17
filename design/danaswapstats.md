@@ -36,7 +36,15 @@ Option 1. Governance can decide to add new, empty pools or destroy an existing
 empty pool.
 
 Option 2. Pools can be merged/split.
-- Harder to implement: Requires the concept of a "killed" pool
+
+# Can pools be killed?
+
+Conclusion: Yes. This is necessary to be able to react to emergency situations
+(i.e. allow governance to shut down trading in case a bug is detected), and to
+allow for a path towards upgrading the DEX ecosystem.
+
+A killed pool is one which only allows one non-admin endpoint: Removing
+liquidity (in all tokens).
 
 # Representing money
 
