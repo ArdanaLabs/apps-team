@@ -1,0 +1,363 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{hyperref}
+
+\title{Picking Decentralized Exchange Pools Algorithmically}
+\author{Nick Van den Broeck / Ardana Labs / Platonic.Systems}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Danaswap is a decentralized exchange (DEX) built on the Cardano blockchain
+platform \cite{danaswap}.
+A DEX is a collection of smart contracts allowing users to trade on-chain assets
+peer-to-peer.
+Danaswap will initially trade stablecoins.
+
+Danaswap follows an automated market model (AMM), similar to Uniswap
+\cite{uniswap, uniswap2, uniswap3} and Curve \cite{curvecrypto, stableswap}.
+In an AMM, so-called liquidity providers deposit assets into a pool, allowing
+others to transact with the pool.
+Providing liquidity can be seen as opening a savings account:
+The assets deposited grow through trading fees while remaining liquid.
+In exchange for the deposit, the liquidity provider obtains liquidity tokens,
+which track their stake in Danaswap.
+
+The holy grail of decentralized exchanges is to remain decentralized, secure and
+scalable.
+Our solution to the scalability requirement is a parallelization system, as
+outlined in our parallelization whitepaper \cite{parallelism}.
+Here is the reason we need parallelization:
+Each transaction consumes and produces unspent transaction outputs (UTXOs).
+However, a transaction cannot consume the output of another transaction that is
+executed in the same block on Cardano's blockchain.
+Therefore, a Cardano DEX without parallelization has limited transaction
+throughput.
+
+A pool, as described earlier, is implemented on the Cardano platform as a UTXO
+through the Extended UTXO (EUTXO) model \cite{eutxo}. Our parallelization scheme involves launching a number of pools and adding more
+over time as the initial pools reach their maximum liquidity.
+Each pool constitutes an independent DEX, except that they share the same liquidity
+token. By giving users a large number of balanced pools that, on the front end, appear and behave as one, prices stabilize while transaction throughput increases.  
+The parallelization scheme does, however, pose a new problem:
+How does a user determine which pool to submit a transaction to?
+To offer a good user experience, we built a pool-selection algorithm.
+To succeed, this algorithm must support the user's economic incentives, as well as
+avoid resource contention.
+
+\section{Background information}
+
+The design of the pool-selection algorithm required a few concepts to be studied
+more closely first. This section provides that background information.
+
+\subsection{What is an invariant equation?}
+
+In automated market models such as Danaswap, the exchange rate at which
+transactions are offered is determined by an invariant equation.
+This is some equation $I(\vec{x}, D) = 0$, where the invariant function $I ::
+\mathbb{R}^{n+1} \rightarrow \mathbb{R}$ depends on the quantity $x_i$ of each
+asset $i$ in the pool, as well as a parameter $D$, representing the number of
+liquidity tokens minted in the pool.
+$n$ is the number of asset classes in the poolset, and we denote $\vec{x} =
+(x_0, x_1, \ldots, x_{n-1})$.
+
+The invariant equation states that any legal combination of asset quantities and
+minted liquidity tokens $(\vec{x}, D)$ must satisfy the equation $I(\vec{x}, D)
+= 0$.
+The Danaswap stablecoin invariant is the StableSwap invariant \cite{stableswap}.
+For more information on the origin of the invariant equation and the
+interpretation of $D$, see the StableSwap and Danaswap whitepapers
+\cite{stableswap, danaswap}.
+
+\subsection{The infinitesimal invariant equation}
+
+Picking a pool to transact against requires calculating some metrics
+that express the transaction's effect on each pool.
+This involves solving the invariant equation.
+Doing so directly might require an unfeasible amount of computing power,
+especially as Danaswap scales.
+Therefore, we need some approximation of the equation that can be solved
+cheaply, yet suffices for selecting the right pool.
+The approximation we will make is that the transactions are small, which
+corresponds practically assumpting small price slippage.
+We can rightfully assume small price slippage because Danaswap is only trading
+stablecoins pegged to the same asset, and its invariant equation is adapted to
+this fact.
+
+Imagine that executing a transaction results in a change $(\vec{x}, D) \mapsto
+(\vec{x}', D')$ within a given pool.
+Let $\partial_D I = \frac{\partial I}{\partial D}$ be the partial
+derivative\footnote{
+  The partial derivative of a function $f :: \mathbb{R}^n \rightarrow
+  \mathbb{R}$ to its $i$-th argument, $\partial_i f$, is the derivative of $f$
+  while considering all arguments $j \neq i$ fixed,
+  $$ \partial_i f(\{x_k\}_k) = \lim_{a \rightarrow x_i} \frac{f(x_1, \ldots, a,
+  \ldots, x_n) - f(x_1, \ldots, x_i, \ldots, x_n)}{a - x_i}. $$
+}
+\cite{partial-derivative} of the invariant to $D$,
+$\partial_i I = \frac{\partial I}{\partial x_i}$, $x_i$ the quantity of asset
+$i$, $\Delta D = D' - D$ and $\Delta x_i = x_i' - x_i$.
+For small transactions, we can make a linear approximation\footnote{
+  A small transaction is defined as one which changes the asset quantities and
+  $D$ only slightly.
+  Let us define $$ \varepsilon = \sqrt{(\Delta D)^2 + \sum_i (\Delta x_i)^2}. $$
+  We then call the transaction small if and only if $\varepsilon$ is small.
+
+  Recall the multivariate Taylor expansion\cite{multivariate-taylor}.
+  For the invariant function $I$, we see that
+  $$ I(\vec{x}', D') = I(\vec{x}, D) + \Delta D \cdot \partial_D I + \sum_i \Delta
+  x_i \cdot \partial_i I + O(\varepsilon^2), $$
+  where $O(\varepsilon^2)$ means that the remainder of the equation is at least of
+  second order in $\varepsilon$.
+}
+\cite{linear-approximation}
+$$ I(\vec{x}', D') = I(\vec{x}, D) + \Delta D \cdot \partial_D I + \sum_i \Delta
+x_i \cdot \partial_i I. $$
+
+Any legal transaction takes a legal state to another legal state, meaning
+$I(\vec{x}, D) = I(\vec{x}', D') = 0$ by virtue of the invariant equation.
+Therefore, for small transactions,
+$$ \Delta D \cdot \partial_D I + \sum_i \Delta x_i \cdot \partial_i I = 0. $$
+This is the so-called \textbf{infinitesimal} invariant equation.
+
+\subsection{Calculating prices}
+
+Pretend, for a moment, to put all the assets of all pools together into one.
+We could then use the infinitesimal invariant equation for the poolset to
+determine the exchange rate between assets, `averaged' over all pools.
+This allows an estimate of the price $P_i$ in some reference currency which is
+also in the poolset.
+In practice, the reference currency will be Ardana's stablecoin,
+$\texttt{dUSD}$.
+
+\subsection{Estimate of the returns of a transaction}
+
+Before we can describe the pool-selection algorithm itself, two more notions must
+be explored.
+The first is to estimate the returns of a transaction in a given pool; the
+second to do the same for the transaction's relative size in that pool.
+There are four types of transactions, which we will explore one by one.
+
+\subsubsection{Deposits}
+
+To get started, we will estimate the returns of depositing assets into a pool.
+Assume the user adds quantity $k_i$ for each asset class $i$. Substituting into
+the infinitesimal invariant equation, we see that
+\begin{equation*}
+  \begin{split}
+    \sum_i k_i \cdot \partial_i I + \Delta D \cdot \partial_D I &= \Delta I = 0
+    \Leftrightarrow \Delta D = - \frac{\sum_i k_i \partial_i I}{\partial_D I} \\
+    \Leftrightarrow |\Delta L| &= \frac{L}{D} \cdot \Big| \frac{\sum_i k_i
+    \partial_i I}{\partial_D I} \Big|,
+    \text{since } \Delta L = L \cdot \frac{\Delta D}{D}.
+  \end{split}
+\end{equation*}
+
+Here, $L$ is the number of liquidity tokens minted in the given pool, and the
+last step relies on the fact that $D$ and $L$ are proportional in how they
+change under any given transaction, before taking fees into account.
+
+\subsubsection{Trades}
+
+Using the same reasoning about a trade selling a quantity $\Delta x_s$ of asset
+$s$ in exchange for asset $p$, we get that
+\begin{equation*}
+  \begin{split}
+    |\Delta x_p| = |\Delta x_s| \cdot \frac{\partial_s I}{\partial_p I}.
+  \end{split}
+\end{equation*}
+
+\subsubsection{Withdrawals in one asset class}
+
+Removing $\Delta L$ liquidity tokens in exchange for tokens of asset $i$:
+\begin{equation*}
+  \begin{split}
+    |\Delta x_i|
+    = \Big| D \cdot \frac{\Delta L}{L} \cdot \frac{\partial_D I}{\partial_i I} \Big|.
+  \end{split}
+\end{equation*}
+
+\subsubsection{Withdrawals}
+
+When removing liquidity in all assets, the returned asset quantities are
+$|\Delta x_i| = \frac{|\Delta L|}{L} \cdot x_i$.
+However, we need a single metric to judge how economically interesting a pool is
+for executing the transaction against.
+In mathematical terms, we need a total ordering relation on the pools.
+Remembering the concept of poolset-generated prices from the calculus
+intermezzo, we can define the Net Asset Value (NAV) of the returns on a
+withdrawal, expressed as a quantity of $\texttt{dUSD}$.
+We can then use as a measure
+
+\begin{equation*}
+  \begin{split}
+    \Delta \text{NAV}
+    = \frac{|\Delta L|}{L} \sum_i P_i \cdot \Delta x_i
+  \end{split}
+\end{equation*}
+
+\subsection{Relative size of a transaction in a pool}
+
+The final concept to define is the relative size of a transaction in a given
+pool, denoted relSize.
+This is related to price slippage:
+If the relative size is small, the price slippage will also be small.
+Using the assumption of small price slippage, we can calculate the output of a
+transaction using the infinitesimal invariant equation.
+Imagine that a given transaction $(\vec{x}, D) \mapsto (\vec{x}', D')$ has some
+output $\Delta X = X(\vec{x}', D') - X(\vec{x}, D)$, then we set
+$$ \text{relSize} = \frac{\Delta X}{X(\vec{x}, D)}. $$
+This represents which percentage of the pool's amount of $X$ is changed by the
+transaction.
+
+Using the estimates of the transaction's returns:
+\begin{equation*}
+  \begin{split}
+    \text{Deposits: } &\Delta L / L \\
+    \text{Trades: } &\forall p \in \{0, \ldots, n-1\}: \Delta x_p / x_p \\
+    \text{Withdrawals in one token: } &\forall i \in \{0, \ldots, n-1\}: \Delta x_i / x_i \\
+    \text{Withdrawals: } &\Delta L / L
+  \end{split}
+\end{equation*}
+
+Lastly, note there is a maximum $L_{max}$ on the number of liquidity tokens
+minted in a given pool.
+This means that relSize must also take into account deposits bringing pools to
+their maximum liquidity.
+We replace the formula for relSize of deposits by
+$$ \text{relSize} = \max\Big( \frac{\Delta L}{L}, \frac{\Delta L / 80\%}{L_{max}
+- L} \Big). $$
+This replacement prevents the pool-selection algorithm from proposing transactions
+that would push a pool over its maximum liquidity.
+The factor $80\%$ compensates for uncertainty in the pool's assets, given
+the latency between the blockchain and the DanaSwapStats backend, where the pool-selection algorithm runs.
+
+\section{The algorithm}
+
+\subsection{The standard flow}
+
+We are now ready to define the pool-selection algorithm.
+The high-level standard flow of the algorithm is very simple:
+Pick an economically good pool which is big enough but not too big.
+Within the algorithm, this is implemented as follows.
+
+\begin{itemize}
+  \item \textbf{Not too small}: To avoid substantial price slippage, we only
+    consider pools where $\text{relSize} \leq 0.01$.
+  \item \textbf{Not too big}: The biggest pools are set aside for the biggest
+    transactions to avoid resource contention. This is done by removing the
+    $10\%$ biggest pools (rounded down) from consideration, where the size of a
+    pool is measured as $1 / \text{relSize}$.
+  \item \textbf{Economically interesting}:
+    Order the remaining pools according to their estimated returns.
+    Note that a pool being the best for one transaction is likely to also be the
+    best for some other transactions.
+    This causes resource contention on the `best' pools.
+    Therefore, instead of always picking the best pool, we choose a random pool
+    from the $x$-th quantile, where
+    $$ x = \frac{1}{\max(4, \sqrt{N})} $$ for $N$ the number of pools.
+\end{itemize}
+
+\subsection{Processing large transactions}
+
+In the last subsection, we described the standard flow of the algorithm.
+This does, however, make one assumption we didn't mention:
+There is at least one pool the transaction fits in ''comfortably'', meaning that
+$$ \text{relSize} \leq 0.01. $$
+
+If this assumption is false, we will try to split up the transaction over
+multiple pools, thus keeping up a good user experience.
+\begin{itemize}
+  \item Split the transaction into $10$ equal pieces, and see if they fit into
+    any pools ''comfortably''.
+  \item If so, pick the $10$ economically best pools with $\text{relSize} \leq
+    0.01$, and split the original transaction equally between those. If there
+    are less than $10$ such pools, split equally between all of them.
+  \item Otherwise, split the original transaction into $100$, and try again.
+\end{itemize}
+
+\subsection{Processing huge transactions}
+
+Imagine the transaction still doesn't fit.
+We then need to adjust our approach to the type of transaction.
+
+\begin{itemize}
+  \item We have decided to refrain from proposing any withdrawals so large they
+    would do more than entirely drain the biggest pool.
+    The user can, of course, split the transaction manually, or avoid the pool-selection algorithm altogether.
+  \item Trades are allowed without a limit.
+    This is implemented by picking the $100$ biggest pools, i.e. with the
+    smallest relSize.
+    The original trade is then split proportionally to $1 / \text{relSize}$,
+    i.e. the biggest piece of trade is executed in the biggest pool.
+  \item Deposits are split over as many pools as necessary.
+    \begin{itemize}
+      \item There is a maximum on the allowed liquidity in each pool, $L_{max}$.
+      \item We fill up the pools with the most space (i.e. maximal $L_{max} -
+        L$) until the deposit is fully assigned.
+      \item If the deposit is bigger than the total liquidity space in all
+        the pools combined, the deposit is rejected.
+    \end{itemize}
+\end{itemize}
+
+\section{Conclusion}
+
+In this article, we described an algorithm to decide, given a transaction and a
+set of Danaswap pools, which pool to transact against.
+The algorithm takes into account price slippage, economic value and resource
+contention, as well as computational efficiency and dealing with all relevant
+edge cases. This pool-selection algorithm is designed to increase throughput and scalability while delivering the best possible experience to Danaswap users. We're eager to test this feature within the community of DEX users, as we think it could bring new opportunities for growth within the DeFi space.
+
+
+\begin{thebibliography}{9}
+
+\bibitem{danaswap} Ardana Labs. \textit{Danaswap: A scalable decentralized
+  exchange for the Cardano blockchain,} 2021.
+    \url{https://docsend.com/view/v4w3muusi6im3ay2}
+
+\bibitem{uniswap} Hayden Adams. \textit{Uniswap Whitepaper}. HackMD, 2020.
+  \url{https://hackmd.io/@HaydenAdams/HJ9jLsfTz}f
+
+\bibitem{uniswap2} Hayden Adams, Noah Zinsmesiter and Dan Robinson.
+  \textit{Uniswap v2 Core}. Uniswap.org, 2020.
+    \url{https://uniswap.org/whitepaper.pdf}
+
+\bibitem{uniswap3} Hayden Adams, Noah Zinsmeister, Moody Salem, River Keefer and
+  Dan Robinson. \textit{Uniswap v3 Core}. Uniswap.org, 2021.
+    \url{https://uniswap.org/whitepaper-v3.pdf}
+
+\bibitem{curvecrypto} Michael Egorov, Curve Finance (Swiss Stake GmbH).
+  \textit{Automatic market-making with dynamic peg.} Curve.fi, 2021.
+    \url{https://curve.fi/files/crypto-pools-paper.pdf}
+
+\bibitem{stableswap} Michael Egorov. \textit{StableSwap - efficient mechanism
+  for Stablecoin liquidity.} Curve.fi, 2019.
+    \url{https://curve.fi/files/stableswap-paper.pdf}
+
+\bibitem{parallelism} Morgan Thomas. \textit{Parallel transaction processing for
+  decentralized exchange smart contracts on the Cardano blockchain}. Platonic.Systems/Ardana, 2021. To be published.
+
+\bibitem{eutxo} Manuel M.T. Chakravarty. \textit{The Extended UTXO Model} IOHK,
+  University of Edinburgh.
+    \url{https://omelkonian.github.io/data/publications/eutxo.pdf}
+
+\bibitem{linear-approximation} Wikipedia. \textit{Linear approximation}.
+  \url{https://en.wikipedia.org/wiki/Linear_approximation}
+
+\bibitem{partial-derivative} Wikipedia. \textit{Partial derivative}.
+  \url{https://en.wikipedia.org/wiki/Partial_derivative}
+
+\bibitem{multivariate-taylor} Wikipedia. \textit{Taylor's theorem for
+  multivariate functions}
+    \url{https://en.wikipedia.org/wiki/Taylor%27s_theorem#Taylor's_theorem_for_multivariate_functions}.
+
+\end{thebibliography}
+
+\end{document}

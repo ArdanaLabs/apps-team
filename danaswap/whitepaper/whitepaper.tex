@@ -1,0 +1,216 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{hyperref}
+
+\title{Danaswap: A scalable decentralized exchange for the Cardano blockchain}
+\author{Ardana Labs / Platonic.Systems}
+
+
+\begin{document}
+
+
+\maketitle
+
+
+Danaswap is a decentralized exchange (DEX) operating on the Cardano blockchain. It was developed to be a stable marketplace for financial assets that live on the Cardano blockchain. Unlike a traditional exchange, Danaswap is governed by smart contracts. This means that the rules by which assets change hands are enforced by the blockchain protocol. Compared to a traditional centralized exchange, users of a decentralized exchange benefit from greater transparency and verifiable guarantees about the behavior of the exchange.
+
+Compared to other decentralized exchanges, Danaswap has the advantage of being written in Plutus, the Cardano smart contract language based in Haskell. The design decisions that went into Haskell and Plutus support writing code that is relatively economical to validate. This allows users to have higher expectations about the correctness of applications built on Plutus compared to competing smart contract platforms. Hundreds of millions of dollars worth of cryptocurrency have been lost due to bugs in smart contracts over their relatively brief history. \cite{guardian2017,cryptobriefing2020} Therefore, smart contract users should demand all practical efforts be taken to ensure the correctness of the smart contracts they depend on. It is with this expectation in mind that Danaswap is being developed.
+
+Like other Plutus programs, Danaswap benefits from the guarantees provided by Haskell's strong type system and purely functional programming paradigm. Additionally, Danaswap is validated using property-based testing and rigorous verification by an auditing team trained in logic, math, and formal proof systems.
+
+Danaswap pays special attention to scalability. It uses a novel smart contract parallelization strategy to support higher transaction throughput than is available with standard Cardano smart contracts, which support a maximum of one transaction per block.
+
+This paper introduces Danaswap from a technical perspective. It looks at some of the major design decisions and the reasoning behind them. It contextualizes the technical choices, explaining the similarities and differences compared to related work. This paper is not a complete specification for Danaswap; rather, it is intended to provide a high-level view, reasonably detailed but not exhaustively so.
+
+The primary inspiration for Danaswap came from Uniswap and Curve. Uniswap is a series of DEX smart contracts for the Ethereum blockchain. \cite{uniswap1,uniswap2,uniswap3} \href{https://curve.fi/}{Curve} is a company which publishes DEX smart contracts for the Ethereum blockchain. \cite{stableswap,curvecrypto} These are just a few of the many decentralized exchange smart contract projects in existence.
+
+From Uniswap v1 to Danaswap, a few fundamentals remain the same. Market participants can interact with the DEX in two roles: as liquidity providers or as traders. Liquidity providers deposit their funds into the DEX contract to allow the contract to act as a counterparty to trades. Traders submit orders to sell one asset in order to buy another, receiving the proceeds of the trades almost instantaneously. Traders do not leave funds deposited into the smart contract, whereas liquidity providers do. Liquidity providers are paid transaction fees for each trade to compensate them for the service of providing liquidity, whereas traders pay these transaction fees each time they execute a trade. Danaswap collects fees for the exchange operators when trades are executed and when liquidity providers add liquidity. Neither traders nor liquidity providers set the prices at which trades execute. A pricing algorithm built into the smart contract determines the price. 
+
+\section{Pricing trades}
+
+Like Uniswap and Curve, Danaswap's pricing algorithm for trades is based on invariant equations. The concept here is that for each contract, there is an equation which must always hold true (the invariant equation). Solving this equation after adjusting some variables results in the price at which a given trade would be executed at a given point in time. Essentially, the invariant equation represents how the exchange rate between two assets changes given supply and demand. In other words, if the supply of an asset $i$ in the liquidity pool declines relative to other assets in the pool, then the relative price of $i$ increases, and vice versa.
+
+To make this more concrete, let $S$ denote the set of possible states within a contract instance. Let $N$ represent the number of distinct assets in the liquidity pool, i.e., the number by which this contract instance allows traders to buy and sell. Let $B : S \to \mathbb{R}^N$ be the function that goes from a state to the balance of each asset's liquidity in the given state.
+
+The invariant equation is modeled abstractly as a function $I : S \to
+\mathbb{R}$, which satisfies $I(x) = 0$ for any state $x \in S$ that the
+contract can obtain. This equation is fundamentally derived from the idea 
+to make the exchange
+rate between two assets only depend on the current state $x \in S$. Before
+accounting for fees, this exchange rate for an infinitesimal trade from asset
+$i$ to $j$ can be written as $exch_{i \rightarrow j} = f(x) =
+-\frac{dx_j}{dx_i}$ for some function $f : S \to \mathbb{R}$. This means that
+$dx_i + f(S) dx_j = 0$ for all transactions between assets $i$ and $j$. Since
+this is true for all assets, there is an invariant quantity $I$ such that
+$exch_{i \rightarrow j} = f(x) = -\frac{\partial_j I(x)}{\partial_i I(x)}$,
+where $\partial_i I(x) = \frac{ \partial I(x)}{\partial x_i}$ is how much $I$
+changes when only $x_i$ is moved. By letting $I(x) = 0$, it is possible to estimate
+how much $x_j$ must be moved to compensate for a move in $x_i$.
+For any transaction where a trader
+wants to sell $q$ units of asset $i$, the amount $q'$ of asset $j$ that may be
+bought is determined by solving $I(x') = 0$ for $q'$, where $x'$
+is $x$ modified such that $B(x')_i = B(x)_i - q$ and $B(x')_j = B(x)_j + q'$.
+
+The invariant is designed to achieve two general objectives: First, it is always possible to trade any assets $i$ and $j$ at some price, and second, market participants are incentivized to resupply assets that come to be in short supply due to trading activity. As mentioned before, depending on the context of the pool, the invariant $I$ is chosen so the system produces additional desirable properties, like decreasing price slippage for a stablecoin DEX. This is why initial Danaswap contracts will use the Stableswap invariant equation proposed in \cite{stableswap}. Later contracts for trading coins that are not necessarily stable will use the CurveCrypto invariant equation described in \cite{curvecrypto}.
+
+For our purposes, a fair market price is one that is similar to prices that may be found in other markets outside the DEX contract. Nothing guarantees that the DEX contract will supply fair market prices in this sense. However, due to the incentives of market participants, prices provided by the DEX contract will tend to converge on fair market prices, and the higher the trading volume on the DEX contract, the more true this will be. The reason is that a significant divergence between DEX contract prices and fair market prices creates an arbitrage opportunity, whereby arbitrageurs can profit by trading on the contract, provided such trading remains profitable after accounting for transaction costs. Over time, such activity will bring the DEX contract prices closer to fair market prices. 
+
+\section{Pricing liquidity}
+
+When market participants add liquidity to Danaswap, they receive liquidity tokens generated by their deposit. The liquidity tokens function like a receipt that indicates the value of the liquidity added. Unlike a receipt, however, the liquidity tokens are divisible and fungible; they can be traded on the open market. The liquidity tokens have value because the smart contract will buy them back. Selling the liquidity tokens back to the DEX contract is how liquidity providers recover the funds they deposited. It is also how they collect transaction fees to compensate them for the service of providing liquidity. The pricing rules for buying back liquidity tokens are designed, in essence, to return to the liquidity providers their original investment plus their fair share of the transaction fees accumulated since their deposit.
+
+The intention just described is achieved by pricing liquidity tokens according to two rules. First, a liquidity token is worth a certain percent share of the assets in the pool, and this percentage does not change except when liquidity is added or removed. Second, the price of a liquidity token is not decreased when liquidity is added or removed.
+
+Here's how it works. For any $x \in S$, let $L(x)$ denote the total number of liquidity tokens in existence when the contract is in state $x$. The contract will buy back one liquidity token for $\frac{1}{L(x)} B(x)$. In other words, the price of a liquidity token is a fraction of the contents of the pool, equal to one over the total number of liquidity tokens in existence.
+
+When a trade occurs, part of the trader's payment to the contract is retained as the fee. This is how trading fees accumulate in the liquidity pool. For this reason, the value of liquidity tokens tends to increase over time (according to the assets in the pool), growing in worth the longer they exist as long as trades occur.\footnote{This statement does not hold not true for all cases. A liquidity token may decrease in worth over time as the ratios between the different assets in the pool change. A more strictly accurate statement is, the liquidity token holder is compensated for trades by the accumulation of trading fees in the liquidity pool over time.}
+
+Thinking of prices as vectors is a little cumbersome, so it is helpful to look at them this way, instead. Assume that for each state $x \in S$, there is a vector of prices $P(x) \in \mathbb{R}^N$ denoting the price of each asset unit in the pool in some reference currency. Let the NAV (net asset value) of the liquidity in the pool when the contract state is $x$ be defined as $P(x) \cdot B(x)$, the dot product of $P(x)$ and $B(x)$. The value of a liquidity token in these terms is $\frac{1}{L(x)} P(x) \cdot B(x)$. In these terms, the value of a liquidity token does not change when liquidity is added to the pool, provided that the added liquidity $\vec{b}$ is in the same ratios as the assets in $B(x)$ --- in other words, provided that $\vec{b}$ is a scalar multiple of $B(x)$, and provided that the liquidity token's price does not change when considering it to be $\frac{1}{L(x)} B(x)$.
+
+In practice, pricing liquidity tokens involves a state value known as $D$. There is a function $D : S \to \mathbb{R}$; in other words, for each state $x \in S$ there is defined a numeric value $D(x)$. $D$ is one of the terms in the invariant equation. Modify the balances $B(x)$ by adding the deposited amounts of liquidity $\vec{b}$ to create a new state $x'$, where $B(x') = B(x) + \vec{b}$. At this point, the invariant equation is violated, $I(x') \neq 0$, provided that $\vec{b} \neq 0$. Then solve for $D$ while holding the balances fixed to get a new state $x''$, where $B(x'') = B(x')$ and $I(x'') = 0$. This provides a new value of $D$, namely $D(x'')$. This helps to compute how many new liquidity tokens to create. The formula when adding liquidity to the pool is $L(x'') = L(x) \times \frac{D(x'')}{D(x)}$. $D$ is essentially a measure of how much liquidity there is in the pool. When adding liquidity, $D$ goes up. The change in $D$ when adding liquidity is proportional to the liquidity being added.
+
+Why would it be true that, after these changes, the price of a liquidity token has not decreased from its previous price of $\frac{1}{L(x)} B(x)$, and what does this mean? To answer this question, let's first look at the conditions under which the price has not changed. Consider the following calculation:
+
+\begin{equation}
+	\begin{split}
+	\frac{1}{L(x'')} B(x'') & = \frac{1}{L(x)} \times \frac{D(x)}{D(x'')} \times B(x'') \\
+				& = \frac{1}{L(x)} \times \frac{D(x)}{D(x'')} \times (B(x) + \vec{b})
+	\end{split}
+	\label{eq:1}
+\end{equation}
+
+Thus, the change in the price of a liquidity token is equal to:
+
+\begin{equation*}
+	\begin{split}
+	\left| \frac{D(x)}{D(x'')} \times \left (\frac{1}{L(x)} \right ) \left(B(x) + \vec{b} \right ) - \frac{1}{L(x)} B(x) \right|
+\\	= \left| \frac{1}{L(x)} \left ( \frac{D(x)}{D(x'')} (B(x) + \vec{b}) - B(x) \right ) \right|
+	\end{split}
+\end{equation*}
+
+
+This difference is equal to zero provided that
+
+\begin{equation*}
+	\frac{D(x)}{D(x'')} \left (B(x) + \vec{b} \right ) - B(x) = 0,
+\end{equation*}
+
+or in other words,
+
+\begin{equation*}
+	\frac{D(x)}{D(x'')} \left (B(x) + \vec{b} \right ) = B(x).
+\end{equation*}
+
+
+This equation is not guaranteed to be true, but when it is true, adding liquidity does not change the price of a liquidity token. On the other hand, if adding liquidity has changed the price of a liquidity token, then it is necessary to define what it means for the price to have increased or decreased. Since liquidity token prices are vectors in this context, it is necessary to define an ordering relation to explain what it means to say that a liquidity token's price has not decreased.
+
+It is most convenient to define an ordering relation on liquidity token prices by turning the price of a liquidity token (conceived of as a vector) into a single number. This is possible to do using a norm. A norm on a vector space $V$ over the scalar field $\mathbb{R}$ is a function $\|\cdot\| : V \to \mathbb{R}$ such that the following properties hold:
+
+\begin{enumerate}
+	\item Non-negativity: $\|\vec{v}\| \geq 0$ for all $v \in V$.
+	\item Positivity: $\|\vec{v}\| > 0$ for all $v \neq \mathbf{0}$.
+	\item Commutativity with scalar multiplication: $\|\alpha \vec{v}\| = |\alpha|\|\vec{v}\|$ for all $\alpha \in \mathbb{R}$ and $\vec{v} \in V$.
+	\item Triangle inequality: $\|\vec{v} + \vec{u}\| \leq \|\vec{v}\| + \|\vec{u}\|$ for all $\vec{v}, \vec{u} \in V$.
+\end{enumerate}
+
+In this case, the vector space $V$ is $\mathbb{R}^N$, and the vectors are elements of $\mathbb{R}^N$ representing liquidity token prices, understood as amounts of each currency in the liquidity pool. Given a norm $\|\cdot\|$ over $\mathbb{R}^N$, let the ordering relation $\leq$ be defined by: $\vec{v} \leq \vec{u}$ if and only if $\|\vec{v}\| \leq \|\vec{u}\|$ for all $\vec{v}, \vec{u} \in \mathbb{R}^N$.
+
+ As an example of a norm, take $\|\vec{v}\| =  |P(x) \cdot \vec{v}|$, where $x \in S$ is the current contract state. In other words, this norm is the absolute value of the vector's dot product with the current prices. In other words, when interpreting $\vec{v}$ as amounts of the currencies in the pool, this norm is the net asset value of $\vec{v}$. It is easy to check that this is a norm. Here is a calculation verifying the triangle inequality:
+
+ \begin{equation*}
+	 \begin{split}
+		 \|\vec{v}+\vec{u}\| & = |P(x) \cdot (\vec{v} + \vec{u})| \\
+		  		     & = |P(x) \cdot \vec{v} + P(x) \cdot \vec{u}| \\
+				     & \leq |P(x) \cdot \vec{v}| + |P(x) \cdot \vec{u}| \\
+				     & = \|\vec{v}\| + \|\vec{u}\|
+	 \end{split}
+ \end{equation*}
+
+ Using this norm to order liquidity token prices, the price of a liquidity token does not decrease after adding liquidity if and only if:
+
+ \begin{equation*}
+	 \left\|\frac{1}{L(x)} B(x)\right\| \leq \left\|\frac{1}{L(x'')} B(x'')\right\|
+ \end{equation*}
+
+ Applying Equation~\ref{eq:1}, this inequality is equivalent to:
+
+ \begin{equation*}
+	 \left\|\frac{1}{L(x)} B(x) \right\| \leq \left\|\frac{1}{L(x)} \times \frac{D(x)}{D(x'')} \times (B(x) + \vec{b}) \right\|
+ \end{equation*}
+
+ This is equivalent to:
+
+ \begin{equation*}
+	 \left\|B(x)\right\| \leq \frac{D(x)}{D(x'')} \left\| B(x) + \vec{b} \right\|
+ \end{equation*}
+
+ Two opposing forces will determine whether this inequality is true. $\frac{D(x)}{D(x'')}$ is less than one, because $D(x'') > D(x)$. $\|B(x) + \vec{b}\|$ is greater than $\|B(x)\|$. If multiplying by $\frac{D(x)}{D(x'')}$ results in a no greater decrease than the increase resulting from adding $\vec{b}$, then the inequality is satisfied.
+
+ There is no analytical solution for $D(x'')$. Therefore, the inequality is not provable using elementary algebraic methods. However, it is possible to test empirically whether or not the equation holds under conditions like those encountered in the real world. Even if occasional counterexamples may occur, that is ok. The point of the rule in question, which is that adding liquidity does not reduce the value of liquidity tokens, is to help provide assurances that providing liquidity will be a profitable activity. Providing liquidity can still be profitable even if it very slightly reduces the value of liquidity tokens. However, there is no apparent reason that it needs to, because if adding liquidity would reduce the value of liquidity tokens under a given calculation, then it is always possible to adjust that calculation to mint fewer liquidity tokens for the same amount of additional liquidity.
+
+When removing liquidity, $D$ is reduced proportionally to the percentage of the total liquidity token supply that the contract is buying back. Since the price paid out by the contract for a quantity $q$ of liquidity tokens is $\frac{q}{L(x)} B(x)$, removing liquidity does not change the price of a liquidity token, because the price in the resulting state $x'$ is:
+
+\begin{equation*}
+	\begin{split}
+		\frac{1}{L(x')} B(x')  &= \frac{1}{L(x) - q} \left( B(x) - \frac{q}{L(x)} B(x) \right)\\
+		&= \frac{1}{L(x) - q} \left( \left(1 - \frac{q}{L(x)} \right) B(x) \right) \\
+		&= \frac{1 - \frac{q}{L(x)}}{L(x) - q} B(x) \\
+		&= \frac{\frac{L(x)}{L(x)} - \frac{q}{L(x)}}{L(x) - q} B(x) \\
+		&= \frac{\frac{L(x) - q}{L(x)}}{L(x) - q} B(x) \\
+		&= \frac{1}{L(x)} B(x).
+	\end{split}
+\end{equation*}
+
+
+\section{Supporting high transaction throughput}
+
+Cardano smart contracts allow for, at most, one transaction to consume a UTXO. For contracts where each endpoint consumes the state UTXO and produces the next state UTXO, there can only be one transaction involving the contract per block. This translates to roughly three transactions per minute, at most. That is not enough transaction throughput to support a massively scalable decentralized exchange. Danaswap addresses this issue by using a parallelization strategy which supports more than one transaction per block.
+
+With only one smart contract instance, and only one state UTXO, which is consumed by each transaction, there can only be one transaction per block interacting with the contract. But by using multiple instances of the same contract, each with its own state UTXO, there can be more than one transaction per block interacting with the contract. Then there can be as many transactions per block which interact with the contract as there are contract instances.
+
+The challenge in making this work is getting all of the smart contract instances to work together in concert. Each contract instance has its own state and its own pool of funds. They are limited in how they can communicate with each other; they can only use communication and synchronization mechanisms which do not prevent concurrency. Yet these contract instances need to work together in such a way that users are unaware that they are interacting with many different liquidity pools. Users should be able to treat all of the parallel copies of the same smart contract as if they were one.
+
+In order to address these design constraints, it makes sense to let the smart contract instances be as independent of each other as possible. Each instance of a pool contract can act as a DEX in itself. The instances do not need to communicate with each other to function properly. They do not share state. However, end users do not need to know that more than one contract instance exists. When a user wants to perform a transaction via the Danaswap app, the app will select for them a contract instance to perform their transaction against. The app will show DEX metrics, such as liquidity and trading volume,
+aggregated across all contract instances. From a basic end user's perspective, the existence of multiple contract instances is an implementation
+detail which should not arouse the user's awareness or concern.
+
+From the perspectives of advanced users, the existence of multiple contract instances may be relevant and important. Each contract instance will offer
+different prices for transactions (both trades and transactions of adding or removing liquidity). This will open up arbitrage opportunities between
+the different contract instances. Arbitrage trading across contract instances is an example of a power user method which requires unpacking the abstraction of all contract instances as one pool. Arbitrage trading is not only expected but, from the point of view of
+the exchange designers, also desired. Arbitrage trading is desirable because it smooths out price differences and allows prices to
+converge. Arbitrage is an important part of the efficient functioning of financial markets.
+
+This is Danaswap's answer to the question of how to split application state across multiple UTXOs and still get a unified result. How can
+contract instances act together as one pool without sharing state? Danaswap's answer to this relies on arbitrage trading, as well as a price-balancing
+mechanism internal to Danaswap, which has a similar effect. Arbitrage trading is a form of non-local information transfer.
+It transfers price change data from one pool to another, as a result of market participants following their incentives, without any
+explicit logic needed in the code. This strikes us as a remarkably elegant solution to the throughput problem.
+
+\begin{thebibliography}{9}
+
+\bibitem{guardian2017}
+	Alex Hern. \textit{`\$300m in cryptocurrency' accidentally lost forever due to bug.} The Guardian, 2017. \url{https://www.theguardian.com/technology/2017/nov/08/cryptocurrency-300m-dollars-stolen-bug-ether}
+
+
+\bibitem{cryptobriefing2020}
+	Anton Tarasov. \textit{Millions Lost: The Top 19 DeFi Cryptocurrency Hacks of 2020.} Crypto Briefing, 2020. \url{https://cryptobriefing.com/50-million-lost-the-top-19-defi-cryptocurrency-hacks-2020/}
+
+\bibitem{uniswap1}
+	Hayden Adams. \textit{Uniswap Whitepaper}. HackMD, 2020. \url{https://hackmd.io/@HaydenAdams/HJ9jLsfTz}f
+
+\bibitem{uniswap2} Hayden Adams, Noah Zinsmesiter and Dan Robinson. \textit{Uniswap v2 Core}. Uniswap.org, 2020. \url{https://uniswap.org/whitepaper.pdf}
+
+\bibitem{uniswap3} Hayden Adams, Noah Zinsmeister, Moody Salem, River Keefer and Dan Robinson. \textit{Uniswap v3 Core}. Uniswap.org, 2021. \url{https://uniswap.org/whitepaper-v3.pdf}
+
+\bibitem{stableswap} Michael Egorov. \textit{StableSwap - efficient mechanism for Stablecoin liquidity.} Curve.fi, 2019. \url{https://curve.fi/files/stableswap-paper.pdf}
+
+\bibitem{curvecrypto} Michael Egorov, Curve Finance (Swiss Stake GmbH). \textit{Automatic market-making with dynamic peg.} Curve.fi, 2021. \url{https://curve.fi/files/crypto-pools-paper.pdf}
+
+\end{thebibliography}
+
+
+\end{document}

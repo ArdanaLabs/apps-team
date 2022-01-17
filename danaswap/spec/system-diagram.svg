@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   sodipodi:docname="system-diagram.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="462.53096"
+     inkscape:cy="589.59404"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="1848"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     objecttolerance="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.35px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="70.040642"
+       y="36.32114"
+       id="text12"><tspan
+         sodipodi:role="line"
+         id="tspan10"
+         x="70.040642"
+         y="36.32114"
+         style="font-size:6.35px;stroke-width:0.264583">End user machine</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.35px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="84.471405"
+       y="51.093483"
+       id="text16"><tspan
+         sodipodi:role="line"
+         id="tspan14"
+         x="84.471405"
+         y="51.093483"
+         style="font-size:6.35px;stroke-width:0.264583">Browser</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.35px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="66.717094"
+       y="63.419128"
+       id="text20"><tspan
+         sodipodi:role="line"
+         id="tspan18"
+         x="66.717094"
+         y="63.419128"
+         style="font-size:6.35px;stroke-width:0.264583">DanaSwapUI (client)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="67.695641"
+       y="83.028976"
+       id="text24"><tspan
+         sodipodi:role="line"
+         id="tspan22"
+         x="67.695641"
+         y="83.028976"
+         style="stroke-width:0.264583">DanaSwapWalletApi</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="73.899094"
+       y="100.48495"
+       id="text28"><tspan
+         sodipodi:role="line"
+         id="tspan26"
+         x="73.899094"
+         y="100.48495"
+         style="stroke-width:0.264583">DanaSwap PAB</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="73.521133"
+       y="117.87183"
+       id="text32"><tspan
+         sodipodi:role="line"
+         id="tspan30"
+         x="73.521133"
+         y="117.87183"
+         style="stroke-width:0.264583">cardano-wallet</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="75.788986"
+       y="137.90443"
+       id="text36"><tspan
+         sodipodi:role="line"
+         id="tspan34"
+         x="75.788986"
+         y="137.90443"
+         style="stroke-width:0.264583">cardano-node</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="30.28993"
+       y="163.40245"
+       id="text40"><tspan
+         sodipodi:role="line"
+         id="tspan38"
+         x="30.28993"
+         y="163.40245"
+         style="stroke-width:0.264583">Cardano blockchain</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="78.22123"
+       y="187.3636"
+       id="text44"><tspan
+         sodipodi:role="line"
+         id="tspan42"
+         x="78.22123"
+         y="187.3636"
+         style="stroke-width:0.264583">Ardana tenant</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="24.883682"
+       y="201.83028"
+       id="text48"><tspan
+         sodipodi:role="line"
+         id="tspan46"
+         x="24.883682"
+         y="201.83028"
+         style="stroke-width:0.264583">cardano-node</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="10.362855"
+       y="227.73174"
+       id="text52"><tspan
+         sodipodi:role="line"
+         id="tspan50"
+         x="10.362855"
+         y="227.73174"
+         style="stroke-width:0.264583">cardano-wallet</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="34.335602"
+       y="252.56601"
+       id="text56"><tspan
+         sodipodi:role="line"
+         id="tspan54"
+         x="34.335602"
+         y="252.56601"
+         style="stroke-width:0.264583">DanaSwap PAB</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="110.28253"
+       y="205.89497"
+       id="text78"><tspan
+         sodipodi:role="line"
+         id="tspan76"
+         x="110.28253"
+         y="205.89497"
+         style="stroke-width:0.264583">DanaSwapStats</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="121.03116"
+       y="227.27121"
+       id="text82"><tspan
+         sodipodi:role="line"
+         x="121.03116"
+         y="227.27121"
+         style="stroke-width:0.264583"
+         id="tspan84">DanaSwapUI (server)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="68.207024"
+       y="227.88356"
+       id="text94"><tspan
+         sodipodi:role="line"
+         id="tspan92"
+         x="68.207024"
+         y="227.88356"
+         style="stroke-width:0.264583">PostgreSQL</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="71.840202"
+       y="275.7731"
+       id="text98"><tspan
+         sodipodi:role="line"
+         id="tspan96"
+         x="71.840202"
+         y="275.7731"
+         style="stroke-width:0.264583">DanaSwapAdminApi</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583"
+       x="118.4284"
+       y="163.57703"
+       id="text102"><tspan
+         sodipodi:role="line"
+         id="tspan100"
+         x="118.4284"
+         y="163.57703"
+         style="stroke-width:0.264583">Pricing DP*</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.35px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.264583"
+       x="52.092495"
+       y="17.996906"
+       id="text106"><tspan
+         sodipodi:role="line"
+         id="tspan104"
+         x="52.092495"
+         y="17.996906"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';stroke-width:0.264583">DanaSwap System Diagram</tspan></text>
+    <rect
+       id="rect931"
+       width="80.769409"
+       height="121.05148"
+       x="59.15062"
+       y="27.007488"
+       style="stroke-width:0.70555558;fill:none;stroke:#000000;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect933"
+       width="72.705376"
+       height="26.870094"
+       x="63.450409"
+       y="43.327099" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect938"
+       width="68.791687"
+       height="12.851191"
+       x="65.444733"
+       y="54.282875" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect940"
+       width="71.871651"
+       height="13.029093"
+       x="63.603512"
+       y="74.367821" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect944"
+       width="56.446949"
+       height="11.749387"
+       x="70.359261"
+       y="92.870674" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect946"
+       width="58.208309"
+       height="10.205358"
+       x="69.327049"
+       y="110.92721" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect948"
+       width="55.491955"
+       height="10.743899"
+       x="70.311783"
+       y="130.93195" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect950"
+       width="201.2959"
+       height="112.42561"
+       x="5.5968347"
+       y="174.30154" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect952"
+       width="50.648811"
+       height="12.851191"
+       x="22.212954"
+       y="194.09282" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect954"
+       width="61.132664"
+       height="13.767547"
+       x="104.95529"
+       y="196.83461" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect956"
+       width="49.76244"
+       height="14.164048"
+       x="9.038558"
+       y="218.48689" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect958"
+       width="40.065502"
+       height="12.473214"
+       x="66.826553"
+       y="219.36612" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect960"
+       width="73.008553"
+       height="11.849867"
+       x="118.15575"
+       y="219.44173" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect962"
+       width="53.603939"
+       height="11.762272"
+       x="31.490763"
+       y="244.39261" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect968"
+       width="74.075211"
+       height="15.497024"
+       x="67.341454"
+       y="266.13882" />
+    <ellipse
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path986"
+       cx="62.609295"
+       cy="160.86369"
+       rx="40.587063"
+       ry="8.9086132" />
+    <ellipse
+       style="fill:none;stroke:#000000;stroke-width:0.705556;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path988"
+       cx="135.87225"
+       cy="161.72874"
+       rx="23.982454"
+       ry="8.2094069" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 166.25064,201.8792 c 0,0 56.28009,-102.049632 -31.79254,-143.099116"
+       id="path990" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.52916667;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 181.09747,219.4675 c 0,0 44.47147,-148.015203 -46.63937,-160.687416"
+       id="path992" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 98.753384,67.281202 v 6.803572"
+       id="path996" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 98.50326,87.683773 v 5.669642"
+       id="path998" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 97.376783,104.53332 v 6.4256"
+       id="path1000" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 97.376783,121.54225 v 9.82738"
+       id="path1002" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="M 81.666619,141.80572 62.389831,152.01108"
+       id="path1004" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 43.860648,169.64027 v 24.11271"
+       id="path1006" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 34.662588,207.22687 v 10.58334"
+       id="path1008" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 33.357666,232.46001 25.324406,11.71727"
+       id="path1010" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 58.265869,256.07317 45.357141,10.20535"
+       id="path1012" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 112.59681,210.8092 c 0,0 9.07143,39.30953 -27.592264,37.04167"
+       id="path1016" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="M 104.80513,203.49058 85.906323,219.74355"
+       id="path1018" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 135.94657,170.94181 v 25.70238"
+       id="path1020" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 135.77549,80.296799 c 0,0 53.28306,41.226261 21.15508,116.065541"
+       id="path1022" />
+    <path
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000;stop-opacity:1"
+       d="m 110.55448,211.10215 v 54.80653"
+       id="path1030" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.93888889px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';stroke-width:0.264583;"
+       x="5.0917435"
+       y="40.004707"
+       id="text1034"><tspan
+         sodipodi:role="line"
+         id="tspan1032"
+         x="5.0917435"
+         y="40.004707"
+         style="stroke-width:0.264583;font-size:4.93888889px;">* Data Provider</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,168 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\title{DanaSwap Specification}
+\author{Morgan Thomas / Ardana Labs / Platonic Systems}
+
+
+\begin{document}
+
+
+\maketitle
+
+\begin{center}
+	\textbf{For internal distribution only.}
+\end{center}
+
+
+DanaSwap will be a (partially) decentralized exchange (DEX). It will enable users to swap assets for other assets. It will enable users to act as liquidity providers, depositing their funds into the DEX so the DEX can use the funds to act as counterparty to swaps executed by users. Liquidity providers collect fees for each swap performed. The exchange operators collect so-called admin fees for each swap performed as well as for each deposit performed by a liquidity provider.
+
+DanaSwap will consist of decentralized software components running on the Cardano blockchain; centralized components running in the Ardana tenant; and decentralized components running on end user machines. The Ardana tenant is a cloud environment consisting of one or more servers in one or more data centers.
+
+DanaSwap will consist of one or more pools. A pool allows users to trade two or more assets against each other. The set of assets which can be traded in a pool is fixed at pool creation time and cannot change later. The basic operations which a user can perform on a pool are: swap, add liquidity, and remove liquidity.
+
+In a swap, the user sends one of the pool assets to the pool. They specify which other asset they want to receive in exchange and the minimum amount they want to receive in exchange. If the request is satisfiable according to the exchange's pricing algorithm, then the DEX adds the funds the user sent to the pool and it sends the user funds from the pool equal to the value of what they sent according to its pricing algorithm, less fees.
+
+In adding liquidity, the user sends one or more of the pool assets to the pool. The pool takes in these assets, calculates how many liquidity tokens this mix of assets is worth, mints that number of liquidity tokens, and sends said tokens to the user. Liquidity tokens represent a stake in the pool. Each liquidity token can be redeemed for a fraction of the tokens in the pool equal in value to one over the number of liquidity tokens.
+
+In removing liquidity, the user sends liquidity tokens to the pool. Optionally, they specify a pool asset that they would like to receive in exchange. The pool burns (i.e. destroys) the sent liquidity tokens. If the user does not specify a pool asset to receive in exchange, then the pool sends them $x$ percent of the balance of each pool asset, where $x$ is the number of liquidity tokens sent divided by the total number of liquidity tokens (including the ones sent). If the user does specify a pool asset to receive in exchange, then the pool uses a pricing algorithm to calculate the relative worth of the liquidity tokens and the chosen asset, and sends the user the tokens it deems to be of equal worth to the liquidity tokens sent, less fees. (There are no fees if the user does not specify an asset to remove the liquidity as.)
+
+Cardano supports at most one transaction per block per contract instance. This means that a pool consisting of one smart contract instance will not support high enough transaction throughput. In order to support higher throughput, DanaSwap pools will consist of multiple contract instances. Ambiguously, each of these contract instances can also be called a pool. To disambiguate where needed, we will also refer to a single contract instance as a subpool and a pool composed of multiple subpools as a pool set. For more details on the concept of pool sets and the approach to parallelization, please refer to the paper ``Parallel transaction processing for decentralized exchange smart contracts on the Cardano blockchain'' (Thomas, Ardana Labs, 2021).
+
+Each pool set may have different assets in its subpools and a different invariant equation and different calculations for fees, etc. Initially, we are targeting one pool using the StableSwap invariant equation; see the paper ``StableSwap - efficient mechanism for Stablecoin liquidity'' (Egorov, Curve, 2019). Within a pool set, all of the subpools must use the same invariant equation, the same calculations for fees, etc.
+
+In this spec, API endpoints are specified in way that assumes there is only one pool set, since initially we are only trying to build one pool set. Generalizing this to allow for the possibility of multiple pool sets is expected to be straightforward.
+
+\section{List of software components}
+
+DanaSwap will involve the following software components:
+
+\begin{figure}
+\includegraphics[width=1.0\columnwidth]{system-diagram.pdf}
+\end{figure}
+
+
+\begin{description}
+	\item[DanaSwap] A set of Plutus smart contracts implementing the core logic for swaps. (Since ``DanaSwap'' refers both to the DEX and to this component of the DEX, we will use the terms ``DanaSwap DEX'' and ``DanaSwap Plutus,'' respectively, if context does not otherwise make it clear which is meant.) In its compiled executable form, DanaSwap Plutus becomes the DanaSwap PAB (Plutus Application Backend). The DanaSwap PAB runs in the Ardana tenant and on the end user machine.
+	\item[DanaSwapStats] A server providing public API endpoints which allow users and DEX components to get knowledge of the market.
+	\item[DanaSwapUI] A web app surfacing DEX functionality and financial metrics to users. This app consists of client side code which runs in the end user's web browser and server side code which runs in the Ardana tenant.
+	\item[DanaSwapAdminApi] A server providing private API endpoints for DEX operators to use to perform administrative functions and for DanaSwapStats to use to update the pricing data used by DanaSwap Plutus.
+	\item[DanaSwapWalletApi] An API which runs on the end user machine and stands between the DanaSwap PAB and the DanaSwapUI and provides API endpoints for executing DanaSwap transactions.
+	\item[DanaSwapOps] A Nix code base which specifies the process for deploying the parts of DanaSwap which live in the Ardana tenant.
+	\item[NixOps] A NixOps daemon runs on each host in the Ardana tenant to support deployments. NixOps also runs on exchange operators' workstations to support deployments.
+	\item[PostgreSQL] Runs in the Ardana tenant and interfaces with DanaSwapStats to serve as a persistent data store. Runs in a replicated master/slave configuration for redundancy.
+	\item[cardano-node] Runs in the Ardana tenant and on end user machines. Acts as the interface between the Cardano blockchain on the one hand, and cardano-wallet and the DanaSwap PAB on the other.
+	\item[cardano-wallet] Runs in the Ardana tenant and on end user machines. Acts as an interface between cardano-node and the DanaSwap PAB. Provides access to private keys for signing Plutus transactions.
+	\item[Firewall] Runs on each host of the Ardana tenant, preventing connections to unauthorized ports and by unauthorized IPs.
+	\item[VPN] Runs on each host of the Ardana tenant and on exchange operator workstations. Creates a subnet wherein hosts in the VPN can communicate amongst themselves, and, with more restrictions, with hosts outside the VPN.
+	\item[SSH server] Runs on each host of the Ardana tenant. Provides access via the SSH client to exchange operator workstations which are in the VPN and have authorized private keys on them.
+	\item[Elastic] Runs on the Ardana tenant and stores server logs in a searchable form.
+	\item[Kibana] Runs on the Ardana tenant and provides access to searchable logs to exchange operator workstations on the VPN.
+	\item[Logstash]	Runs on each host of the Ardana tenant. Sends log data to Elastic.
+	\item[Some monitoring solution] Runs on the Ardana tenant and provides access to metrics about server health, network traffic, and other information useful to ensuring the proper functioning of the Ardana tenant and troubleshooting issues.
+	\item[Some price data provider(s)] Provide pricing data to DanaSwapStats which is stored in Postgres and forwarded on to DanaSwapAdminApi which forwards them to DanaSwap PAB to set the pricing data used by DanaSwap Plutus.
+\end{description}
+
+Another note on terminology. In Plutus there is a concept of a transaction. In DanaSwap, there is a concept of a transaction. A DanaSwap transaction is a swap, a deposit (to act as a liquidity provider), or a withdrawal (the inverse of a deposit). A DanaSwap transaction may be accomplished in one Plutus transaction, or it may require more than one. To keep clear this distinction, we will use the terms ``DanaSwap transaction'' and ``Plutus transaction.''
+
+The system diagram summarizes the key interactions between the components.
+
+
+\section{Interfaces between components}
+
+This section outlines the APIs of first-party DanaSwap components.
+
+\subsection{DanaSwap Plutus}
+
+The DanaSwap smart contract will have the following endpoints:
+
+\begin{description}
+	\item[Initialize] The endpoint will accept as parameters all data required to initiialize the contract. The endpoint can only be called successfully by the contract owner. The endpoint will store all provided data in the state and transition the contract into a state where transactions may be performed against it.
+
+	\item[Swap] The endpoint will accept as parameters the asset to purchase, the asset to pay in, the minimum amount to purchase, and the amount to pay. It shall expect the specified amount to the payment asset to be sent. It shall compute the price of the swap by solving the invariant equation for the balance of the purchase asset after subtracting the payment asset for the balances and considering the change in the balance of the purchase asset to be the gross amount which may be purchased with the given payment. It shall consider the net amount which may be purchased to be the gross amount minus the fee. The contract shall add the payment to the pool and send the net amount purchased to the caller. The transaction shall go through only if the net amount purchased is at least the specified minimum.
+
+	\item[Add liquidity] The endpoint shall accept as parameters a set of currency amounts to add. It shall expect amounts of currencies correlating with the parameters. It shall solve the invariant equation for $D$ based on the balances after adjusting the currency amounts.  The contract shall take out the admin fee and adjust the pool balances accordingly. It shall mint and issue liquidity tokens proportional to the change in $D$. The transaction shall go through only if it would not cause the maximum pool size to be exceeded. The pool size is measured as the total number of liquidity tokens and the pool size limit is configurable separately for each subpool, set at subpool creation time and adjustable after subpool creation time by the contract owner.
+
+	\item[Remove liquidity] The endpoint shall accept as parameters the minimum amounts of pool currencies to redeem. It shall expect some amount of liquidity token to be sent. The contract shall reduce the balances by an amount proportional to the reduction in liquidity token supply (so as not to change the nominal value of the liquidity tokens). It shall send the amounts removed to the caller and burn the liquidity tokens sent. The transaction shall go through only if the minimum amounts of pool currencies would be sent to the caller. It shall not go through if it would reduce the balance of a currency, or the liquidity token supply, to less than zero.
+
+	\item[Remove liquidity as one token] The endpoint shall accept as parameters the pool currency to get and the minimum amount to get. It shall expect some amount of liquidity token to be sent. It shall solve the invariant equation for the balance of the asset to get after reducing $D$ proportionally to the liquidity token amount sent vs the total liquidity token supply. It shall regard the change in balance from this calculation as the amount to get. The contract shall send the amount to get to the caller and burn the liquidity tokens sent and adjust the balances and $D$ accordingly. The transaction shall go through only if the amount to get is at least the specified minimum. It shall not go through if it would reduce the balance of a currency, or the liquidity token supply, to less than zero. Unlike the normal remove liquidity endpoint, this endpoint charges a fee.
+
+	\item[Adjust parameter values] The endpoint can only be called successfully by the contract owner. The endpoint will accept new parameter values and a time at which the change should take effect. The parameters will be all of the elements of the pool state which can be considered parameters and which are the same for all subpools in a pool set at each point in time, including the fee, the admin fee, and the amplification coefficient. The endpoint will simply store these future values.
+
+The way that the changes take effect is that when an endpoint is called and the current time is later than the designated time, the state gets updated to reflect the new parameter values.
+
+	\item[Revert adjust parameter values] The endpoint can only be called successfully by the contract owner. The endpoint will simply clear out the state changes caused by the adjust parameter values endpoint, which are the future parameter values and the time at which they will take effect.
+
+	\item[Transfer ownership] The endpoint can only be called successfully by the contract owner. The endpoint will accept a new owner address and a time at which the change should take effect. The endpoint will simply store these values.
+
+The way that the changes take effect is that when an endpoint is called and the current time is later than the designated time, the state gets updated to reflect the new owner.
+
+	\item[Revert transfer ownership] The endpoint can only be called successfully by the contract owner. The endpoint will simply clear out the state changes caused by the transfer contract ownership endpoint, which are the future owner address and the time at which it will take effect.
+	
+	\item[Collect admin fees] Only the contract owner may successfully call this endpoint. The endpoint shall send to the owner the difference between the nominal balances in the contract state and the actual balances held by the contract.
+
+	\item[Donate admin fees] Only the contract owner may successfully call this endpoint. All it does is set the nominal balances equal to the actual balances. The nominal balances are the balances stored in the contract state. The actual balances are the balances of pool currencies held by the contract. The difference between these values is the amount uncollected admin fees. The intent of this endpoint is that it donates the uncollected admin fees to the liquidity providers.
+
+	\item[Kill pool] Only the contract owner may successfully call this endpoint. The endpoint turns on a flag in the contract state which disables all endpoints except for the remove liquidity endpoint. The flag disables the remove liquidity as one token endpoint.
+
+	\item[Unkill pool] Only the contract owner may successfully call this endpoint. The endpoint turns off the flag which the kill pool endpoint turns on.
+
+	\item[Set pool size limit] Only the contract owner may successfully call this endpoint. The endpoint sets the pool size limit, i.e. the maximum number of liquidity tokens. The change takes effect immediately when the endpoint is called. The endpoint will succeed only if it does not set the pool size limit to less than the current liquidity token supply.
+\end{description}
+
+
+\subsection{DanaSwapStats}
+
+The DanaSwapStats server will have the following API endpoints. The possible chart grains sizes are: one minute, five minutes, ten minutes, thirty minutes, one hour, four hours, twelve hours, one day, one week, and one month.
+
+\begin{description}
+	\item[Combined stats] This endpoint will accept no parameters. It will return a fixed set of statistics. It will return the following aggregate stats over all pool sets: total deposits, total daily volume, total daily fee volume, total daily transaction count, total liquidity utilization. It will return the following stats for each pool set: recent daily APY, recent daily volume, recent weekly APY, recent monthly APY, recent annual APY, total APY, daily fee volume, amplification coefficient, fee ratio, admin fee ratio, virtual price, liquidity utilization, NAV, daily transaction count, and current balances of each pool asset.
+	\item[Total liquidity chart] This endpoint will accept as parameters a time range, and a chart grain size. It will output the total liquidity (i.e., the NAV USD) over all pool sets for each grain in the range.
+	\item[Total volume chart] This endpoint will accept as parameters a time range, and a chart grain size. It will output the total volume (USD) over all pool sets of trades, deposits, withdrawals, and all transaction for each grain in the range.
+	\item[Liquidity chart] This endpoint will accept as parameters a pool set name, a time range, and a chart grain size. It will output the total liquidity (i.e., the NAV USD) over all pools in the set for each grain in the range.
+	\item[Fee chart] This endpoint will accept as parameters a pool set name, a time range, and a chart grain size. It will output the total charged fee volume (value USD) over all pools in the set for each grain the range.
+	\item[Transaction count chart] This endpoint will accept as parameters a pool set name, a time range, and a chart grain size. It will output the counts over all pools in the set, for each grain in the range, of trades, deposits, withdrawals, and all transactions.
+	\item[APY chart] This endpoint will accept as parameters a pool set name, a time range, and a chart grain size. It will output the annualized APY over all pools in the set for each grain in the range.
+	\item[Transactions] This endpoint will accept as parameters a pool set name, a transaction type (trade, deposit, withdrawal, or any), and a time range. It will output a list of the transactions of the specified type that occurred in the set in the range.
+	\item[Find a good pool to do a swap on] This endpoint will accept as parameters a pool set name, an asset to purchase, an asset to pay in, an amount to pay, and a minimum amount to purchase. It will return the address of a good pool to do the specified swap on. Here's how to find a good pool to do a swap on. Let $A$ be the purchase asset and $B$ the payment asset. Order the pools in descending order by $\text{balance}(A) / \text{balance}(B)$. Pick a random one in the top $x$ percentile (e.g., top quartile). 
+	\item[Find a good pool to add liquidity to] This endpoint will accept as parameters a pool set name and map from pool assets to quantities. It will return the address of a good pool to add the specified amounts of liquidity to. TODO how?
+	\item[Find a good pool to remove liquidity from] This endpoint will accept as parameters a pool set name. It will return the address of a good pool to remove liquidity from. TODO how?
+	\item[Find a good pool to remove liquidity from in one token] This endpoint will accept as parameters a pool set name and an asset. TODO how?
+	\item[Fetch list of subpool addresses] This endpoint will accept as parameters a pool name. It will return the addresses of the subpools in the pool.
+\end{description}
+
+
+\subsection{DanaSwapWalletApi}
+
+The DanaSwapWalletApi server will have the following API endpoints:
+
+\begin{description}
+	\item[Swap] The endpoint will accept as parameters the asset to purchase, the asset to pay in, the minimum amount to purchase, and the amount to pay. It will call the stats server to find good pool(s) to trade on. It will call the PAB to submit the trade(s). If needed, it will first split the UTXO to be spent into multiple UTXOs, to avoid resource contention and allow for parallelism.
+	\item[Add liquidity] The endpoint will accept as parameters the amounts of currencies to deposit. It will call the stats server to find good pool(s) to add liquidity to. It will call the PAB to submit the deposit(s). If needed, it will first split the UTXO to be spent into multiple UTXOs, to avoid resource contention and allow for parallelism.
+	\item[Remove liquidity] The endpoint will accept as parameters the amount of liquidity token to redeem and optionally the currency to redeem in. It will call the stats server to find good pool(s) to remove liquidity from. It will call the PAB to submit the withdrawal(s). If needed, it will first split the UTXO to be spent into multiple UTXOs, to avoid resource contention and allow for parallelism.
+\end{description}
+
+
+\subsection{DanaSwapAdminApi}
+
+The DanaSwapAdminApi server will only be accessible from inside the VPN. Some solution will be designed for ensuring that its endpoints can only be called by authorized exchange operators.
+
+The DanaSwapAdminApi server will have the following API endpoints:
+
+\begin{description}
+	\item[Set new parameters] The endpoint will accept new parameter values and a time at which the change should take effect. The parameters will be all of the elements of the pool state which can be considered parameters, including the fee, the admin fee, the amplification coefficient, the minimum pool size, the maximum pool size, and the maximum transaction size. The endpoint will query the stats API for a list of all pools. The endpoint will use the PAB to call the corresponding transfer ownership endpoint on all pools.
+	\item[Revert parameter changes] The endpoint will accept no parameters. The endpoint will query the stats API for a list of all pools. The endpoint will use the PAB to call the corresponding revert parameter change endpoint on all pools.
+	\item[Transfer ownership] The endpoint will accept a new contract owner address and a time at which the change should take effect. The endpoint will query the stats API for a list of all pools. The endpoint will use the PAB to call the corresponding transfer ownership endpoint on all pools.
+	\item[Revert transfer ownership] The endpoint will accept no parameters. The endpoint will query the stats API for a list of all pools. The endpoint will use the PAB to call the corresponding revert transfer ownership endpoint on all pools.
+	\item[Collect admin fees] The endpoint will accept no parameters. The endpoint will query the stats API for a list of all pools. The endpoint will use the PAB to call the corresponding collect admin fees endpoint on all pools.
+	\item[Donate admin fees] The endpoint will accept no parameters. The endpoint will query the stats API for a list of all pools. The endpoint will use the PAB to call the corresponding donate admin fees endpoint on all pools.
+	\item[Kill pool(s)] The endpoint will accept a list of pool addresses, or a special option to kill all pools. The endpoint will query the stats API for a list of all pools if needed. The endpoint will use the PAB to call the corresponding kill pools endpoint on all relevant pools.
+	\item[Unkill pool(s)] The endpoint will accept a list of pool addresses, or a special option to unkill all pools. The endpoint will query the stats API for a list of all pools if needed. The endpoint will use the PAB to call the corresponding kill pools endpoint on all relevant pools.
+	\item[Adjust pool size limit(s)] The endpoint will accept a list of pairs of pool addresses and pool sizes. The endpoint wil use the PAB to call the corresponding set pool size limit endpoints on all relevant pools.
+	\item[Create pool(s)] The endpoint will accept a list of pool sizes. The endpoint will use the PAB to create new contract instances and initialize them with the appropriate parameters consistent with the existing pools as specified by the stats API. It will ensure that in some fashion the stats API is notified of this change and updates the database appropriately.
+\end{description}
+
+\end{document}
