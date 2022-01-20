@@ -105,27 +105,24 @@ Option 2. Purescript-based project
 
 # How to turn multiple prices into one
 
-Option 1. Take the median.
+Proposal: Take the median.
 
-Do we want to go more complex than this? E.g. if the distribution of prices is
-seriously out of wack (e.g. 40% says the price is double what the other 60%
-says), stop updating the prices? Would this actually be helpful in a crisis
-situation?
-
-# Do we want to add emergency shutdown?
+# Do we want to add emergency shutdowns?
 
 
 # Do we want to use read-only UTXOs?
 
 See CIP-31. Might take a while to be on mainnet.
 
-# Earlier MakerDAO architecture
+# What are the effects of price manipulations on MakerDAO?
 
-The biggest difference between modern and initial MakerDAO is that initially it
-only supported ETH as collateral and was named Single-Collateral DAI (SAI).
+Black Thursday: Submit transactions with too small a gas fee. These get
+rejected, but forms a DoS attack. As a result, the attack could take all the
+MakerDAO auctions at a very, very low price. This is the only price manipulation
+attack on MakerDAO so far.
 
-Multi-Collateral DAI appears to be introduced in November 2019
-https://blog.makerdao.com/zero-to-one-billion-dai-five-years-of-growth-for-makerdao/.
+Worries for us:
+- Block space is small, so resource contention is an issue
 
 
 
