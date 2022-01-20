@@ -109,10 +109,23 @@ Proposal: Take the median.
 
 # Do we want to add emergency shutdowns?
 
+Goal: Return people's collateral if dUSD goes to zero, to avoid arbitrageurs
+running away with all the money through liquidation events.
+
+This would require setting up some smart contract that must be consulted for
+every liquidation event.
+
+Proposal: Do not build an emergency shutdown option until read-only UTXOs are
+implemented on mainnet.
 
 # Do we want to use read-only UTXOs?
 
-See CIP-31. Might take a while to be on mainnet.
+- See CIP-31
+- IOHK hopes to launch this in July
+- We will revisit our protocols once this is launched, to further optimize them
+
+What to look into once Cardano supports read-only UTXO inputs?
+- dUSD emergency shutdowns
 
 # What are the effects of price manipulations on MakerDAO?
 
