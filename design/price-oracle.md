@@ -127,6 +127,10 @@ implemented on mainnet.
 What to look into once Cardano supports read-only UTXO inputs?
 - dUSD emergency shutdowns
 
+# Where will we get the price information?
+
+???
+
 # What are the effects of price manipulations on MakerDAO?
 
 Black Thursday: Submit transactions with too small a gas fee. These get
