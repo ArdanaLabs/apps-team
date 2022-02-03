@@ -2,54 +2,58 @@
 
 DEX:
 - Invariant equation solver RESTful API
-  * Build the RESTful API
-  * Integrate the API with Danaswap
+  * Build the RESTful API or library
+  * Integrate with Danaswap and Stats
   * Add an endpoint to Stats to produce a price quote for a trade
 - Finish Stats
+  * Set up testing environment for Stats + Danaswap
   * Link DEX with Stats & rollups to store the states correctly
   * Make sure Stats recovers well after downtime
-- DEX Admin API
-- Create a non-stablecoin DEX (initially ADA <-> dUSD)
-- Upgrade Danaswap to Aeson >= 2.0.1.0
+- DEX Admin CLI
+- Create a non-stablecoin DEX (initially ADA <-> dUSD): Implement invariant
+  equation and solver and test (including boundary finder)
 
 Stablecoin:
-- Understand exactly what is there already: Code, docs, design decisions still
-  to be made...
+- Understand exactly what is there already: Code, docs...
+- Set up design documents
+- Set up a testing environment and test the code that is already there (except
+  what will be thrown out)
 - Price oracle off-chain code
 - Vault off-chain code
 - dUSD Admin API: Adjust parameters, trigger protocol-wide actions, treasury
   (and buffer) to hold governance-owned assets
 - Vault liquidation arbitrage bot
+- Build a backend between the dUSD PAB and StablecoinUI
+
+Frontend:
+- Ardana website
+- DanaswapUI
+- StablecoinUI
+- Orbis website
 
 Others:
 - Maeserat & E2E testing
 - Hardware security module
 - Ardana tenant Nix expression
 - Deploy contracts to mainnet
-- Haskell package management
-  * Look into stacklock2nix
-  * Stack + nix?
-  * Merge repos into a birepo: One haskell.nix repo, one non-haskell.nix repo?
 - Improve CI: Dangerous functions list
 
 # Doing
 
 - Athan: Invariant equation solver
-- Tommy: Setting up basic E2E testing framework
-- Matthew: Genesis transaction generation for more complex E2E testing framework
+- Tommy: E2E testing framework setup
+- Matthew: E2E testing framework setup
 - Oleg: Hardware security module
-- Nick: Understand the current status of the dUSD project
+- Nick: Onboard new reports & understand the dUSD and frontend current status
+  and goals
 
 # Blocked
 
-- YubiHSM2 server access
-- Genesis transaction generation
-- Nix issue with the basic E2E testing framework
-- The smart contracts team is ready to implement on-chain code
-  * Set up a test to make sure on-chain and off-chain match
-  * Set up designs for each component: DEX, DEX Admin, price oracle, vault,
-    buffer, dUSD Admin
-- Invariant equation: What is the goal of the non-stablecoin DEXes at launch?
+- Nix issue integrating the basic E2E testing framework with CI
+- Tests that on-chain and off-chain code match
+- On-chain/off-chain interface specs
+- Invariant equation: What are the goal and constraints on the non-stablecoin
+  DEXes at launch?
 
 
 

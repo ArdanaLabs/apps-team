@@ -129,7 +129,8 @@ What to look into once Cardano supports read-only UTXO inputs?
 
 # Where will we get the price information?
 
-???
+Suggestions:
+- https://data.chain.link/ethereum/mainnet/crypto-usd/ada-usd
 
 # What are the effects of price manipulations on MakerDAO?
 

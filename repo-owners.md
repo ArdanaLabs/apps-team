@@ -19,11 +19,9 @@ Audit: Quinn
 
 Mason: nixos-module
 
-Frontend: ???
-- Code: DanaSwapUI
-
 Apps team: Nick
-- Code: Stats, Danaswap and ardana-dollar, dana-circulating-supply
+- Code: Stats, Danaswap and ardana-dollar, dana-circulating-supply, DanaSwapUI,
+  orbis website
 - Docs: apps-team
 - Infra: Maeserat
 
