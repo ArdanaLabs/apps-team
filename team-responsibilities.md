@@ -2,28 +2,38 @@
 
 DEX:
 - Invariant equation solver RESTful API
-  * Build the RESTful API or library
-  * Integrate with Danaswap and Stats
+  * Rewrite the solver using Doubles
+  * Benchmark
+  * Integrate with Danaswap
   * Add an endpoint to Stats to produce a price quote for a trade
 - Finish Stats
   * Set up testing environment for Stats + Danaswap
   * Link DEX with Stats & rollups to store the states correctly
   * Make sure Stats recovers well after downtime
-- DEX Admin CLI
+- DEX
+  * Make the address of the pools deterministically predictable, to make
+    discovering pools easy
+  * Anyone can create the first pool for a given trading pair, but the second
+    one requires the admin API
+  * Set up a minting policy for liquidity tokens
+    https://github.com/ArdanaLabs/DanaSwap/issues/234
+  * Test and finalize Danaswap
+  * Admin CLI
 - Create a non-stablecoin DEX (initially ADA <-> dUSD): Implement invariant
   equation and solver and test (including boundary finder)
 
 Stablecoin:
-- Understand exactly what is there already: Code, docs...
+- Write a whitepaper
 - Set up design documents
-- Set up a testing environment and test the code that is already there (except
-  what will be thrown out)
-- Price oracle off-chain code
-- Vault off-chain code
-- dUSD Admin API: Adjust parameters, trigger protocol-wide actions, treasury
-  (and buffer) to hold governance-owned assets
+- Set up a testing environment
+- Decide which code should be tested and which should be thrown out
+- Price oracle
+- OSM
+- Vault
+- Buffer: Adjust parameters, trigger protocol-wide actions (surplus auctions,
+  debt auctions..)
 - Vault liquidation arbitrage bot
-- Build a backend between the dUSD PAB and StablecoinUI
+- Connect the dUSD PAB and StablecoinUI
 
 Frontend:
 - Ardana website
@@ -34,6 +44,11 @@ Frontend:
 Others:
 - Maeserat & E2E testing
 - Hardware security module
+  * DevOps the YubiHSM code
+  * Write a script to put a Cardano wallet's private key on a YubiHSM2, and test
+  * Write a script to Cardano-sign using a YubiHSM2, and test
+  * Figure out how Cardano signing works
+  * Integrate YubiHSM signing with the Cardano PAB
 - Ardana tenant Nix expression
 - Deploy contracts to mainnet
 - Improve CI: Dangerous functions list
