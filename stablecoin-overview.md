@@ -1,3 +1,51 @@
+# dUSD protocol
+
+We are building a stablecoin called the Ardana dollar (dUSD), using a
+MakerDAO-like protocol based on overcollateralized vaults. Initially, the only
+allowed collateral class will be ADA.
+
+Liquidation mechanism:
+- The collateral-to-debt (CtB) ratio must initially be at least 1.5
+- When this ratio drops below 1.2, the vault opens up to external parties
+  liquidating part of the vault, until the ratio is back up to 1.5
+- If the ratio drops below 1.0, liquidation will no longer happen, so the buffer
+  must mint dUSD and pay back the debt instead
+  * This shouldn't happen too often, as it decreases the dUSD price
+
+When the dUSD price goes up:
+- Users create more dUSD debt
+- Daily savings rate (DSR) goes down
+- Stability fee goes up
+- Surplus auctions
+
+If the dUSD price drops:
+- Users pay back their dUSD debt
+- Daily savings rate (DSR) goes up
+- Stability fee goes down
+- Debt auctions
+
+Notes:
+- We will create a buffer to hold the system's profits. This buffer will be able
+  to mint and burn dUSD for surplus/debt auctions.
+- In surplus auctions, the buffer mints dUSD and sells them for DANA, in order
+  to decrease the dUSD price
+  * The DANA is locked in the buffer, increasing the value of DANA, which is how
+    profits are generated
+- What must be built: Price oracle, OSM, vault, liquidity bot, buffer
+
+Design decisions:
+- How to modulate between the three protocol/admin-governed stability
+  mechanisms: DSR, stability fee and surplus/debt auctions
+- Which data should the price oracle store?
+  * Option 1. Just the most recent price
+  * Option 2. The price fluctuations in the last 48h, allowing people to prove a
+    vault has been in trouble for 48h+
+- Do we want to set a minimum vault deposit?
+- Do we want to implement an emergency shutdown procedure?
+  * We can ignore this question for the coming months, and re-evaluate once
+    everything else has been built
+- How big should the liquidation fee (punishment for the vault owner) be?
+
 # Ensuring stablecoin backing
 
 The stablecoin system contains three major parts:
@@ -44,9 +92,13 @@ paid back. The protocol will continuously put a part of its profits into a
 buffer (both in dUSD and ADA), which will be used to pay back this remaining
 debt.
 
-Note: In the MakerDAO system, there is another fail safe called debt auctions.
-However, this requires minting and selling governance tokens (thus diluting the
-supply), which Ardana is not set up to allow.
+Notes:
+- In the MakerDAO system, there is another fail safe called debt/surplus
+  auctions
+  * However, this requires minting and selling governance tokens, thus diluting
+    the supply, which Ardana is not set up to allow.
+  * Problem: Surplus auctions are how the MakerDAO makes money for the
+    governance owners, namely by burning governance tokens
 
 # Price stabilization
 
