@@ -2,6 +2,7 @@
 
 \usepackage{amsfonts}
 \usepackage{amsmath}
+\usepackage{hyperref}
 
 \title{Parallel transaction processing for decentralized exchange smart contracts on the Cardano blockchain}
 \author{Morgan Thomas / Ardana Labs / Platonic Systems}
@@ -16,15 +17,34 @@
 
 \section{Context}
 
-Cardano smart contracts support at most one transaction per block. This translates to roughly three transactions per minute at most.
-This is not enough to support applications such as a decentralized exchange (DEX). Here we are going to look at a possible approach 
-for working around this limitation to create a DEX on the Cardano blockchain which supports higher transaction
-throughput not limited by the rate of creating blocks. Though the focus is on the decentralized exchange application, some lessons
-from this research may be applicable to other applications also.
+Cardano smart contracts support at most one transaction per block\footnote{
+  The Cardano blockchain is built on an EUTXO system.
+  This means that each smart contract's state is represented by a UTXO.
+  Any transaction which updates such state, consumes this UTXO and produces a
+  new UTXO.
+  Therefore, the next transaction updating the state must wait for the former
+  transaction to be done, so it can consume the resulting UTXO.
+  This is why transactions updating the same smart contract must be executed
+  sequentially.
+}.
+This translates to roughly three transactions per minute at most,
+which is not enough to support applications such as a decentralized exchange (DEX).
 
-Taking the limitation of one transaction per block per contract instance as a given, it becomes clear that it is necessary to use more
-than one contract instance to support higher throughput than one transaction per block. So the question is, how can we structure a
-contract made up of multiple instances in such a way that the various instances work together to create a unified result?
+In order to solve this, one can start by launching a Cardano DEX on top of
+\href{https://orbisprotocol.com/}{Orbis}, a second layer solution based on
+Zero-Knowledge Rollups.
+This project will increase Cardano's transaction throughput to thousands of
+transactions per second.
+However, the Orbis project is limited in its sequential transaction throughput.
+In this paper, we will investigate a possible workaround for this limitation.
+Though the focus is on the decentralized exchange application, some lessons may
+be applicable to other applications also.
+
+The limitation of one transaction per block per contract instance brings us to
+the idea to use more than one contract instance to increase the throughput.
+This poses the question how we can structure a contract made up of multiple
+instances in such a way that the various instances work together to create a
+unified result.
 
 I will start into this by presenting a simplified model of a DEX contract which we can use to study the issue at a high level.
 The contract has three endpoints: one to execute a trade, one to add funds, and one to remove funds. There are $n$ distinct
@@ -126,25 +146,30 @@ against. By doing so, we offer more economic efficiency for the user and also in
 market, because this does the same work that cross-pool arbitrageurs would do which ensures reasonably
 consistent liquidity token pricing. This is a claim that we should validate.
 
-Users can, if they wish, choose which pool they perform a transaction against. We provide a means by
-which users can ignore the fact that there are many pools and experience all of them as one.
-This includes a mechanism which automatically selects, behind the scenes, a pool or pools to perform
-their transaction against. It also includes mechanisms which produce unified prices for the assets
-in the pools and the liquidity tokens. However, users may if they wish also inspect the liquidity
-token prices and asset prices of the individual pools and choose specific pools to perform their
-transactions against. Arbitrage trading is an example of an activity which may benefit from doing this.
-We cannot reasonably prevent users from interacting with the individual pools in any manner they choose
-to do, and so we need to design the system in a way where anything they can do by interacting
-with individual pools is not likely to disrupt the proper functioning of the system. The way in which
-this is to be achieved is by setting up the market in such a way that whatever it is in users' economic
-incentives to do by interacting with individual pools will also tend to increase the efficiency
-of the market. The opportunities we're aware of which are opened up by interacting with individual
-pools are in the nature of cross-pool arbitrage and hypothesized to increase the efficiency of the
-market by promoting consistency in prices across the different pools. The arbitrage opportunities
-exploit price differences between the pools and have the tendency (or so we hypothesize)
-to flatten out those differences, causing the price differences to flatten out and the arbitrage
-opportunities to go away. The expected end result is a market where the prices differences
-between the different pools are small enough that it is not profitable to arbitrage them
+Users can, if they wish, choose which pool they perform a transaction against.
+We provide a means by which users can ignore the fact that there are many pools
+and experience all of them as one.  This includes a mechanism which
+automatically selects, behind the scenes, a pool or pools to perform their
+transaction against. It also includes mechanisms which produce unified prices
+for the assets in the pools and the liquidity tokens. However, users may if they
+wish also inspect the liquidity token prices and asset prices of the individual
+pools and choose specific pools to perform their transactions against. Arbitrage
+trading is an example of an activity which may benefit from doing this.  We
+cannot reasonably prevent users from interacting with the individual pools in
+any manner they choose to do, and so we need to design the system in a way where
+anything they can do by interacting with individual pools is not likely to
+disrupt the proper functioning of the system. The way in which this is to be
+achieved is by setting up the market in such a way that whatever it is in users'
+economic incentives to do by interacting with individual pools will also tend to
+increase the efficiency of the market. The opportunities we're aware of which
+are opened up by interacting with individual pools are in the nature of
+cross-pool arbitrage and hypothesized to increase the efficiency of the market
+by promoting consistency in prices across the different pools. The arbitrage
+opportunities exploit price differences between the pools and have the tendency
+(or so we hypothesize) to flatten out those differences, causing the price
+differences to flatten out and the arbitrage opportunities to go away. The
+expected end result is a market where the price differences between the
+different pools are small enough that it is not profitable to arbitrage them
 away after accounting for transaction costs.
 
 \end{document}
