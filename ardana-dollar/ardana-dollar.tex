@@ -1,0 +1,91 @@
+\documentclass[12pt]{article}
+
+\usepackage[usenames,dvipsnames]{color}
+
+\usepackage{lmodern}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\usepackage{xcolor}
+
+\title{Ardana Dollar Overview}
+\author{Evan Piro / Ardana Labs / Platonic Systems}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+	\textbf{For internal distribution only.}
+\end{center}
+
+\begin{center}
+	\color{red} This document is still a work in progress and should not be used for reference until complete.
+\end{center}
+
+
+
+In order for a system of token exchange to be considered a dependable system of currency, the tokens must have a value that is tightly correlated with a stable, real-world asset. In this document, we'll describe the design and incentives of a distributed system that maintains the value of a stabilized token, called a stablecoin, such that it can perform the functions of money.
+
+\section{Vault}
+
+To understand how stablecoin value is created and stabilized, we need to understand it's collatorizing component, the vault. A vault is an account where an asset of a certain type can be deposited and withdrawn, and the account holder can generate a new asset that is collateralized at the deposited asset's equivalent value to an external asset, most commonly a circulating fiat currency. The new asset that is generated is designed to maintain a one to one ratio in value with the external asset, enabling it to serve as a unit of account and a non-volatile liquid means of exchange. We call this a stablecoin.
+
+\subsection{Rules}
+
+For the deposited assets, or collateral, in the vault to effectively back the value of the generated assets, or debt, the ratio of the collateral's value to the quantity of debt must remain above an established threshold. This is called the liquidation ratio.
+
+** below is subject to removal, mathematical definitions here might hinder comprehension **
+
+Given the quantity of collateral as collateral, price as current USD to collateral rate, debt as quantity of generated assets.
+Let Collateralization ratio = (price * collateral) / debt
+Vault is considered collateralized if Collateralization ratio greater than or equal to Liquidation ratio
+
+
+\subsection{Stability Fee}
+
+
+An interest rate, called the stability fee, is applied continuously to the outstanding debt. As debt is paid off, the portion of the debt that represents the stability fee is sent to the buffer, which is a dedicated pool for system resources, increasing it's supply of collateralized debt, or stablecoin.
+
+The purpose of this fee is to control the quantity of stablecoin in circulation. When the stability fee is increased, vault owners are incentivized to pay stablecoin into their vault debt, reducing the quantity of stablecoin in circulation. When the stability fee is decreased, they're incentivized to generate more debt, which increases the quantity of stablecoin in circulation. This mechanism in concert with the savings rate, which we'll discuss later, enables governance to employ supply and demand economics to control the price of the stablecoin.
+
+\subsection{Liquidation}
+
+It is the responsibility of the vault owner to ensure that the collateralization ratio always remains above the liquidation ratio so that the generated asset's value is stabilized. The vault owner can either pay off existing debt or deposit more collateral to maintain stability. If the vault's collateralization ratio falls below the liquidation ratio, the vault becomes subject to liquidation. The process of liquidation consists of auctioning off collateral for the outstanding debt until the vault has no remaining debt. This is handled deterministically by setting the buying price of the collateral at its current value in debt and increasing the amount of collateral until a bidder agrees to purchase the collateral to cover the debt. If collateral is left over after vault liquidation, the remaining collateral is unlocked and available for withdrawal. If all collateral is exhausted from the liquidation before the debt is cleared, the funds within the buffer are used to cover the remaining debt.
+
+The process of liquidation is designed to be costly for the vault owner. The vault owner must pay the liquidation fee, which is a percentage of the outstanding debt. The purpose of this fee is to prevent the vault owner from driving a vault to insolvency and exploiting auctions to recover the original collateral. \footnote{https://github.com/livnev/auction-grinding/blob/master/grinding.pdf}
+	
+\subsection{Why use a vault?}
+
+A vault allows people to increase their exposure to price fluctuations in a supported collateralized asset type. To demonstrate the incentives of vault participation, let's go through a few examples in Ardana Dollar, using ADA as the collateral asset, dUSD as the stablecoin, and the price of ADA per USD as the measure of collatorization.
+
+	\subsubsection{Investing without a vault}
+
+Say the current price per ADA is \$1.00 and Anna has \$1500 and predicts the price of ADA will increase by 10\% in a year. She wants to take advantage of this opportunity so she uses her \$1500 to buy 1500 ADA on an exchange. She waits a year and sells the 1500 ADA for \$1650, making a \$150 profit.
+
+	\subsubsection{Investing with a vault}
+
+Let's say Anna wants more than 10\% profits on her initial investment. So instead of simply buying ADA and reselling it a year later, she buys the 1500 ADA and deposits it in a vault with a liquidation ratio of 1.5, a stability fee of 0.05\%, and a liquidation fee of 13\%. She then takes out a loan of 995 dUSD from the vault and sells it on an exchange for \$995. She uses the \$995 to buy 995 ADA and deposits the ADA in the vault, increasing the balance of collateral in the vault to 2495 ADA. A year later, when her prediction is correct and ADA has gone up 10\% to \$1.10 per ADA, the dollar value of the collateral in the vault will have risen to \$2744.50 while the debt value after application of the stability fee of 0.05\% is 999.98 dUSD. Now Anna can withdraw collateral until the collateralization ratio of the vault is just above the liquidation ratio, which in this example is set to 1.5. So she withdraws 1131.40 ADA and sells it on an exchange for \$1244.54. She then uses \$999.98 to buy 999.98 dUSD on an exchange and uses the dUSD to pay off the remaining debt in the vault, freeing her locked collateral of 1363.60 ADA. She sells her unlocked ADA for \$1499.96 on the exchange, resulting in a balance of \$1744.52, making a \$244.52 profit.
+
+	\subsubsection{Vault life cycle}
+
+Suppose Anna's prediction is wrong and after a year the USD price per ADA crashes by 50\% to a current price of \$0.50 per ADA. Applying the new price of ADA to the 2495 ADA collateralized in the vault, she now has \$1247.50 worth of ADA collateralized against 999.98 dUSD. The collatorization ratio of the vault is now at 1.25 which is below the liquidation ratio of 1.5. The 2495 ADA locked in the vault is now subject to liquidation until the 999.98 dUSD balance is paid back plus the liquidation fee, which is set to 13\%. With the liquidation fee applied, the debt needed to be covered by liquidation is 1129.98 dUSD, which is equivalent to the collateral value of 564.99 ADA. An auction is initiated where the buying price of 1129.98 dUSD for 564.99 ADA is offered to auction participants. As the auction continues, the buying price in ADA is increased until a participant agrees to purchase the collateral. After the auctioneer has increased the price of the 1129.98 dUSD for the collateral to 1120.99 ADA, an auction participant initiates a purchase exchanging 1129.98 dUSB for 1120.99 ADA. The dUSD received from the auction brings the vault's debt to 0 and the 1120.99 ADA is deducted from the 2494 ADA locked in the vault , making the remaining collateral value now at 1373.01 ADA. The collateral is then unlocked and available for withdrawal by the vault owner. Anna withdraws the collateral and converts it to dollars on an exchange, resulting in a balance of \$686.51 at a loss of \$813.49.
+
+\section{Stablecoin Functions}
+
+Now that we've defined how stablecoins are created and collateralized, let's now turn to how they're used and the incentives behind their usage.
+
+\subsection{Medium of Exchange}
+
+A key activity in a stablecoin ecosystem is the exchange of stablecoins for goods and services. For example, let's say Anna runs a vintage clothing store on Cardano. She purchases her supply in USD cash at various thrift stores. If she were to list the products online at their price in ADA, she would have to constantly update the price to reflect current USD value. She would also need to immediately exchange her ADA for USD to minimize the risk of losing revenue to ADA price fluctuations. Instead, she lists the products in dUSD value and accepts dUSD in exchange for her product. When she receives the stablecoin payment, she can rest assured that the value of the dUSD maps 1 to 1 to her revenue in USD.
+
+\subsection{Store of Value}
+People can deposit their dUSD into a savings pool to accumulate interest via an interest rate that is applied continuously. This is called the savings rate. The savings rate is paid out from revenues generated by stability fees which are stored in the buffer.
+
+The savings rate can be raised or lowered by the system's governance to influence demand for dUSD. For example, if the USD price for dUSD drops below \$1.00, then governance can raise the savings rate to incentivize more people to buy dUSD and deposit it in the savings pool. Inversely, if the USD price of dUSD rises above \$1.00, the savings rate is decreased, which results in people withdrawing their dUSD from the savings pool and selling off their dUSD.
+
+\color{red} This document is still a work in progress and should not be used for reference until complete
+
+
+\end{document}
