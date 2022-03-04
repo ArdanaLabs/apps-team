@@ -97,10 +97,10 @@ In order to know if a vault is under-collateralized, a trusted party needs to pr
 
 \subsection{Liquidator}
 
-The liquidator is a user that is rewarded for liquidating deficient vaults by searching for vaults that have sunk below the liquidation ratio, using price data from the price oracle gateway to calculate the vault's collateralization ratio. It connects under-collateralized vaults to a liquidity provider that can swap the vault's collateral for enough stablecoin to repay the vault's debt. The liquidator is incentivized to perform these actions by receiving the liquidation fee portion of a vault's debt as a reward for successful liquidation.
+The liquidator is a user that is rewarded for liquidating deficient vaults by searching for and initiating liquidation on vaults that have sunk below the liquidation ratio, using price data from the price oracle gateway to calculate the vault's collateralization ratio. It connects under-collateralized vaults to a liquidity provider that can swap the vault's collateral for enough stablecoin to repay the vault's debt. The liquidator is incentivized to perform these actions by receiving the liquidation fee portion of a vault's debt as a reward for successful liquidation.
 
 \begin{flushleft}
-	\color{red} @Todo Example WIP.
+	\color{red} @Todo Example WIP
 \end{flushleft}
 
 Let's demonstrate stabilization in action on Cardano. Say there is a vault open with 1000 ADA in collatoral, 500 dUSD in debt, a liquidation ratio of 1.5, and a stability fee of 13\%. We'll ignore the stability fee as it will be negligible in the example. Now let's say the price provider gateway is showing a current price of \$1.00 per ADA and an upcoming price of \$0.74 per ADA. The liquidator calculates the liquidation price using the price provider gateway's current price and the vault's collateral and debt, getting \$0.75. Because the current price of ADA is less than the liquidation price, the vault is considered sufficiently collatoralized so the liquidator takes no further action. An hour later, the liquidator checks again and gets the same liquidaton price on the vault, at \$0.75, but now gets a current price of \$0.74 from the price provider gateway. Because the liquidation price is less than the current price on the vault, the liquidator now initiates a liquidation. The liquidation fee of 13\% is added on top of the debt making the current vault debt 565 dUSD.
