@@ -32,9 +32,11 @@ To understand how stablecoin value is created and stabilized, we need to underst
 
 \subsection{Collatoral Requirement}
 
-For the deposited assets, or collateral, in the vault to effectively back the value of the generated assets, or debt, the ratio of the collateral's value to the quantity of debt must remain above an established threshold. This is called the liquidation ratio.
+For the deposited assets, or collateral, in the vault to effectively back the value of the generated assets, or debt, the ratio of the collateral's value to the quantity of debt must remain above an established threshold. This is called the liquidation ratio. This ratio defines the level of risk a vault owner wants to take on. The higher the liquidation ratio, the higher the chances of liquidation unless vault owners pays off debt or deposits more collateral.
 
-** below is subject to removal or needs better mathematically presentation **
+\begin{flushleft}
+	\color{red} @Todo Format
+\end{flushleft}
 
 Given the quantity of collateral as collateral, price as current USD to collateral rate, debt as quantity of generated assets.
 Let Collateralization ratio = (price * collateral) / debt
@@ -43,18 +45,21 @@ Vault is considered collateralized if Collateralization ratio greater than or eq
 
 \subsection{Stability Fee}
 
-
 An interest rate, called the stability fee, is applied continuously to the outstanding debt. As debt is paid off, the portion of the debt that represents the stability fee is sent to the buffer, which is a dedicated pool for system resources, increasing it's supply of collateralized debt, or stablecoin.
 
 The purpose of this fee is to control the quantity of stablecoin in circulation. When the stability fee is increased, vault owners are incentivized to pay stablecoin into their vault debt, reducing the quantity of stablecoin in circulation. When the stability fee is decreased, they're incentivized to generate more debt, which increases the quantity of stablecoin in circulation. This mechanism in concert with the savings rate, which we'll discuss later, enables governance to employ supply and demand economics to control the price of the stablecoin.
 
-\subsection{Liquidation}
+\subsection{Liquidation Ratio}
 
-It is the responsibility of the vault owner to ensure that the collateralization ratio always remains above the liquidation ratio so that the generated asset's value is stabilized. The vault owner can either pay off existing debt or deposit more collateral to maintain stability. If the vault's collateralization ratio falls below the liquidation ratio, the vault becomes subject to liquidation. If collateral is left over after vault liquidation, the remaining collateral is unlocked and available for withdrawal by the vault owner. If all collateral is exhausted from the liquidation before the debt is cleared, the funds within the buffer are used to cover the remaining debt. We'll discuss auctions more in depth later.
+It is the responsibility of the vault owner to ensure that the collateralization ratio always remains above the liquidation ratio so that the generated asset's value is stabilized. The vault owner can either pay off existing debt or deposit more collateral to maintain stability. If the vault's collateralization ratio falls below the liquidation ratio, the vault becomes subject to liquidation. If collateral is left over after vault liquidation, the remaining collateral is unlocked and available for withdrawal by the vault owner. If all collateral is exhausted from the liquidation before the debt is cleared, the funds within the buffer are used to cover the remaining debt.
 
-The process of liquidation is designed to be costly for the vault owner. The vault owner must pay the liquidation fee, which is a percentage of the outstanding debt. The purpose of this fee is to prevent the vault owner from driving a vault to insolvency and exploiting auctions to recover the original collateral. \footnote{https://github.com/livnev/auction-grinding/blob/master/grinding.pdf}
-	
+The process of liquidation is designed to be costly for the vault owner. The vault owner must pay the liquidation fee, which is a percentage of the outstanding debt. The purpose of this fee is twofold: to prevent the vault owner from driving a vault to insolvency and exploiting auctions to recover the original collateral \footnote{https://github.com/livnev/auction-grinding/blob/master/grinding.pdf}, and to incentivize the actions of liquidators. We'll discuss liquidation more in depth later.
+
 \subsection{Why use a vault?}
+
+\begin{flushleft}
+	\color{red} @Todo change the following examples to 50\% ADA price swing in both directions.
+\end{flushleft}
 
 A vault allows people to increase their exposure to price fluctuations in a supported collateralized asset type. To demonstrate the incentives of vault participation, let's go through a few examples in Ardana Dollar, using ADA as the collateral asset, dUSD as the stablecoin, and the price of ADA per USD as the measure of collatorization.
 
@@ -78,23 +83,35 @@ Now that we've defined how stablecoins are created and collateralized, let's now
 
 A key activity in a stablecoin ecosystem is the exchange of stablecoins for goods and services. For example, let's say Anna runs a vintage clothing store on Cardano. She purchases her supply in USD cash at various thrift stores. If she were to list the products online at their price in ADA, she would have to constantly update the price to reflect current USD value. She would also need to immediately exchange her ADA for USD to minimize the risk of losing revenue to ADA price fluctuations. Instead, she lists the products in dUSD value and accepts dUSD in exchange for her product. When she receives the stablecoin payment, she can rest assured that the value of the dUSD maps 1 to 1 to her revenue in USD.
 
-\subsection{Store of Value}
+\subsection{Savings}
 Stablecoin holders can deposit their dUSD into a savings pool to accumulate interest via an interest rate that is applied continuously. This is called the savings rate. The savings rate is paid out from revenues generated by stability fees which are stored in the buffer. The upper bound of the savings rate is defined by the current vault stability fee.
 
 The savings rate can be raised or lowered by the system's governance to influence supply and demand for stablecoin, controlling it's price. For example, if the USD price for dUSD drops below \$1.00, then governance can raise the savings rate to incentivize people to buy stablecoin and deposit it in the savings pool, which in turn will lead to more stablecoin being distributed via savings accumulation. Inversely, if the stablecoin price in dUSD rises above \$1.00, the savings rate can be decreased, which results in people withdrawing their dUSD from the savings pool and using it for exchange.
 
-\section{Auctions}
 
-Auctions are employed to respond to excessive or deficient value across the system. These include collateral auctions as well as buffer surplus and debt auctions.
+\section{Stabilization}
+When a vault's collateralization ratio falls below the liquidation ratio, it's collateral needs to be liquidated before the value of the outstanding debt exceeds the value of the collateral. This is performed through the actions of two external participants, the price provider and the liquidator.
 
-\subsection{Collateral Auctions}
+\subsection{Pricing Data}
+In order to know if a vault is under-collateralized, a trusted party needs to provide the current exchange price. This is achieved by entrusting an external entity the authority to set the price and have it available across the network. This entity, called the price provider, aggregates price data across exchanges and sets the price in the price provider gateway, which makes price data accessible across the network. The price provider gateway holds the current price as well as the upcoming price and delays updating the current price with the upcoming price by a set interval of time to allow governance to intervene should the price diverge from expectation. This interval is set by governance.
 
-When a vault's collatoralization ratio falls below the liquidation ratio, it becomes subject to a collateral auction. External acts are incentivized to participate in liquidation by being given the opportunity to buy undervalued collateral with stablecoin.
+\subsection{Liquidator}
 
-Auction participants place bids on how much stablecoin they're willing to pay for the collateral in the vault. Once a bid is cast which equals the outstanding debt plus the liquidation fee, the auction participants can now bid on how much collateral they wish to receive in exchange for the fixed amount of vault debt. The participant with the lowest bid within the duration of the auction wins. The vault debt is then paid off in exchange for the winning collateral bid, which is deducted from the vault's collateral. Any remaining collateral in the vault is returned to the vault owner.
+The liquidator is a user that is rewarded for liquidating deficient vaults by searching for vaults that have sunk below the liquidation ratio, using price data from the price oracle gateway to calculate the vault's collateralization ratio. It connects under-collateralized vaults to a liquidity provider that can swap the vault's collateral for enough stablecoin to repay the vault's debt. The liquidator is incentivized to perform these actions by receiving the liquidation fee portion of a vault's debt as a reward for successful liquidation.
 
+\begin{flushleft}
+	\color{red} @Todo Example WIP.
+\end{flushleft}
 
-\color{red} This document is still a work in progress and should not be used for reference until complete
+Let's demonstrate stabilization in action on Cardano. Say there is a vault open with 1000 ADA in collatoral, 500 dUSD in debt, a liquidation ratio of 1.5, and a stability fee of 13\%. We'll ignore the stability fee as it will be negligible in the example. Now let's say the price provider gateway is showing a current price of \$1.00 per ADA and an upcoming price of \$0.74 per ADA. The liquidator calculates the liquidation price using the price provider gateway's current price and the vault's collateral and debt, getting \$0.75. Because the current price of ADA is less than the liquidation price, the vault is considered sufficiently collatoralized so the liquidator takes no further action. An hour later, the liquidator checks again and gets the same liquidaton price on the vault, at \$0.75, but now gets a current price of \$0.74 from the price provider gateway. Because the liquidation price is less than the current price on the vault, the liquidator now initiates a liquidation. The liquidation fee of 13\% is added on top of the debt making the current vault debt 565 dUSD.
 
+\section{Governance}
+\begin{flushleft}
+	\color{red} @Todo
+\end{flushleft}
 
+\section{Conclusion}
+\begin{flushleft}
+	\color{red} @Todo
+\end{flushleft}
 \end{document}
