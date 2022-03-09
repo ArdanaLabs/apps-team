@@ -22,10 +22,11 @@ Cardano smart contracts support, at most, one transaction per block\footnote{
   This means that each smart contract's state is represented by a UTXO.
   Any transaction which updates the contract's state consumes this UTXO and produces a
   new UTXO. Under these constraints, transactions that update the contract must be executed sequentially.
-  In other words, The next transaction in the queue must wait for the previous
-  transaction to conclude so it can consume the resulting UTXO}.
-  
-The result of this sequential process is that the system can only execute, at most, three transactions per minute, which is not enough to support applications such as a decentralized exchange (DEX).
+  In other words, the next transaction in the queue must wait for the previous
+  transaction to conclude so it can consume the resulting UTXO.}.
+This means that the system can only execute, at most, three transactions per
+minute, which is not enough to support applications such as a decentralized
+exchange (DEX).
 
 To solve this problem, one can start by launching a Cardano DEX on top of
 \href{https://orbisprotocol.com/}{Orbis}, a second layer solution based on
