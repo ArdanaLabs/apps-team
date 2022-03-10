@@ -9,7 +9,7 @@
 
 \usepackage{xcolor}
 
-\title{Stablecoin Overview}
+\title{Ardana Dollar Overview}
 \author{Evan Piro / Ardana Labs / Platonic Systems}
 
 \begin{document}
@@ -24,30 +24,28 @@
 	\color{red} This document is still a work in progress and should not be used for reference until complete.
 \end{center}
 
-In order for a system of token exchange to be considered a dependable system of currency, the tokens must have a value that is tightly correlated with a stable, real-world asset. In this document, we'll describe the design and incentives of a distributed system that maintains the value of a stabilized token, called a stablecoin, such that it can perform the functions of money.
+In order for a system of token exchange to be considered a dependable system of currency, the tokens must have a value that is tightly correlated with a stable, real-world asset. In this document, we'll describe the design and incentives of a distributed system that maintains the value of a stabilized token, called a stablecoin or dUSD, such that it can perform the functions of money.
 
 \section{Vault}
 
-To understand how stablecoin value is created and stabilized, we need to understand it's collatorizing component, the vault. A vault is an account where an asset of a certain type can be deposited and withdrawn, and the account holder can generate a new asset that is collateralized at the deposited asset's equivalent value to an external asset, most commonly a circulating fiat currency. The new asset that is generated is designed to maintain a one to one ratio in value with the external asset, enabling it to serve as a unit of account and a non-volatile liquid means of exchange. We call this a stablecoin.
+To understand how stablecoin value is created and stabilized, we need to understand it's collatorizing component, the vault. A vault is an account where an asset of a certain type can be deposited and withdrawn, and the account holder can generate a new asset that is collateralized at the deposited asset's equivalent value to an external asset, most commonly a circulating fiat currency. The new asset that is generated is designed to maintain a one to one ratio in value with the external asset, enabling it to serve as a unit of account and a non-volatile liquid means of exchange. We call this a stablecoin. We'll be referring to the stablecoin as dUSD and the external asset as USD.
 
 \subsection{Collatoral Requirement}
 
-For the deposited assets, or collateral, in the vault to effectively back the value of the generated assets, or debt, the ratio of the collateral's value to the quantity of debt must remain above an established threshold. This threshold we'll refer to as the liquidation ratio. This ratio defines the level of risk a vault owner wants to take on. The higher the liquidation ratio, the higher the chances of liquidation unless the vault owner pays off debt or deposits more collateral.
+For the deposited assets, or collateral, in the vault to effectively back the value of the generated assets, or debt, the ratio of the collateral's value to the quantity of debt must remain above an established threshold. This threshold we'll refer to as the liquidation ratio. This ratio defines the level of risk a vault owner wants to take on. The higher the liquidation ratio, the higher the chances of vault liquidation unless the vault owner pays off debt or deposits more collateral.
 
-The current level of collatorization in a vault, called the collatorization ratio, can be calculated with the following, where price is the price of the current external asset per 1 unit of collateral, collateral is the total quantity of collateral deposited in the vault, and debt is the total quantity of debt issued against the collateral.
+The current level of collatorization in a vault, called the collatorization ratio, can be calculated with the following, where price is the price of USD for 1 unit of ADA, collateral is the total quantity of ADA deposited in the vault, and debt is the total quantity of dUSD issued against the collateral.
 
 \begin{equation*}
 	collateralizationRatio = \frac{price * collateral}{debt}
 \end{equation*}
 A vault is considered under-collateralized and is subject to liquidation if the collatorization ratio falls below the liquidation ratio.
 
-
-
 \subsection{Stability Fee}
 
-An interest rate, called the stability fee, is applied continuously to the outstanding debt. As debt is paid off, the portion of the debt that represents the stability fee is sent to the buffer, which is a dedicated pool for system resources, increasing it's supply of collateralized debt, or stablecoin.
+An interest rate, called the stability fee, is applied continuously to the outstanding debt. As debt is paid off, the portion of the debt that represents the stability fee is sent to the buffer, which is a dedicated pool for system resources, increasing it's supply of collateralized debt in dUSD.
 
-The primary purpose of this fee is to provide revenue to the buffer which is used to ensure stability in case of widespread under-collatoralization. The secondary purpose is to influence the price of the stablecoin by controlling the quantity of stablecoin in circulation. When the stability fee is increased, vault owners are incentivized to pay stablecoin into their vault debt to slow the effects of interest accrual, reducing the quantity of stablecoin in circulation. When the stability fee is decreased, they're incentivized to generate more debt, which increases the quantity of stablecoin in circulation.
+The primary purpose of this fee is to provide revenue to the buffer which is used to ensure stability in case of widespread under-collatoralization. The secondary purpose is to influence the price of the stablecoin by controlling the quantity of stablecoin in circulation. When the stability fee is increased, vault owners are incentivized to pay stablecoin into their vault debt to slow the effects of interest accrual, reducing the quantity of dUSD in circulation. When the stability fee is decreased, they're incentivized to generate more debt, which increases the quantity of dUSD in circulation.
 
 \subsection{Liquidation Ratio}
 
@@ -55,7 +53,7 @@ It is the responsibility of the vault owner to ensure that the collateralization
 
 \subsection{Liquidation Fee}
 
-The process of liquidation is designed to be costly for the vault owner. The vault owner must pay the liquidation fee, which is a percentage of the outstanding debt. The purpose of this fee is twofold: to prevent the vault owner from driving a vault to insolvency and exploiting auctions to recover the original collateral \footnote{https://github.com/livnev/auction-grinding/blob/master/grinding.pdf}, and to provide further revenues to the buffer. We'll discuss liquidation more in depth later.
+The process of liquidation is designed to be costly for the vault owner. The vault owner must pay the liquidation fee, which is a percentage of the outstanding debt. The purpose of this fee is threefold: to prevent the vault owner from driving a vault to insolvency, to provide additional incentive to external users, called liquidators, to find and initiate liquidation on difficient vaults, and to provide further revenues to the buffer. We'll discuss liquidation more in depth later.
 
 \subsection{Why use a vault?}
 
@@ -85,11 +83,11 @@ A key activity in a stablecoin ecosystem is the exchange of stablecoins for good
 When a vault's collateralization ratio falls below the liquidation ratio, it's collateral needs to be liquidated before the value of the outstanding debt exceeds the value of the collateral. This is performed through the actions of two external participants, the price provider and the liquidator.
 
 \subsection{Pricing Data}
-In order to know if a vault is under-collateralized, a trusted party needs to provide the current exchange price. This is achieved by entrusting an external entity the authority to set the price and have it available across the network. This entity, called the price provider, aggregates price data across exchanges and sets the price in the price provider gateway, which makes price data accessible across the network. The price provider gateway holds the current price as well as the upcoming price and delays updating the current price with the upcoming price by a set interval of time to give vault owners a window of time to liquidate should their vault become under-collateralized and to allow governance to intervene should the price diverge from expectation.
+In order to know if a vault is under-collateralized, a trusted party needs to provide the current exchange price. This is achieved by entrusting an external entity the authority to set the price and have it available across the network. This entity, called the price oracle, aggregates price data across exchanges and sets the price in the price oracle gateway, which makes price data accessible across the network. The price oracle gateway holds the current price as well as the upcoming price and delays updating the current price with the upcoming price by a set interval of time to give vault owners a grace period to liquidate should their vault become under-collateralized and to allow governance to intervene should the price diverge from expectation.
 
 \subsection{Liquidator}
 
-The liquidator is a user that is rewarded for liquidating deficient vaults by searching for and initiating liquidation on vaults that have sunk below the liquidation ratio, using price data from the price oracle gateway to calculate the vault's collateralization ratio. It connects under-collateralized vaults to a liquidity provider that can swap the vault's collateral for enough stablecoin to repay the vault's debt.
+The liquidator is a user that is rewarded for liquidating deficient vaults by searching for and initiating liquidation on vaults that have sunk below the liquidation ratio, using price data from the price oracle gateway to calculate the vault's collateralization ratio. It connects under-collateralized vaults to a liquidity provider that can swap the vault's collateral for enough dUSD to repay the vault's debt.
 
 The most simple way for a liquidator to assess whether the vault should be liquidated or not is by calculating the vault's liquidation price using the following equation:
 
@@ -101,11 +99,27 @@ If the liquidation price is below the current price provided by the oracle, the 
 
 \subsection{Liquidation in Action}
 
-Let's demonstrate what a liquidation would look like on Cardano. Say there is a vault open with 1000 ADA in collatoral, 500 dUSD in debt, a liquidation ratio of 1.5, and a liquidation fee of 13\%. We'll ignore the stability fee as it will be negligible in the example. Now let's say the price provider gateway is showing a current price of \$1.00 per ADA and an upcoming price of \$0.74 per ADA. The liquidator calculates the liquidation price using the price provider gateway's current price and the vault's collateral and debt, getting \$0.75. Because the current price of ADA is less than the liquidation price, the vault is considered sufficiently collatoralized so the liquidator takes no further action. An hour later, the liquidator checks again and gets the same liquidaton price on the vault, at \$0.75, but now gets a current price of \$0.74 per ADA from the price provider gateway. Because the liquidation price is less than the current price on the vault, the liquidator now initiates a liquidation. The liquidation fee of 13\% is added on top of the debt making the current vault debt 565 dUSD. The liquidator connects the vault to an exchange to execute a swap at the exchange's current ADA to dUSD price, which we'll say is 0.76 dUSD per ADA. With the price applied, a swap of 429.4 ADA is made for the vault debt amount of 565 dUSD. The vault debt is now cleared and the remaining collateral of 570.6 is available for the vault owner to withdraw.
+Let's demonstrate what a liquidation would look like on Cardano. Say there is a vault open with 1000 ADA in collatoral, 500 dUSD in debt, a liquidation ratio of 1.5, and a liquidation fee of 13\%. We'll ignore the stability fee as it will be negligible in the example. Now let's say the price provider gateway is showing a current price of \$1.00 per ADA and an upcoming price of \$0.74 per ADA. The liquidator calculates the liquidation price using the price provider gateway's current price and the vault's collateral and debt, getting a liquidation price of \$0.75. Because the current price of ADA is less than the liquidation price, the vault is considered sufficiently collatoralized so the liquidator takes no further action. An hour later, the liquidator checks again and gets the same liquidaton price on the vault, at \$0.75, but now gets a current price of \$0.74 per ADA from the price provider gateway. Because the liquidation price is less than the current price on the vault, the liquidator now initiates a liquidation. The liquidation fee of 13\% is added on top of the debt making the current vault debt 565 dUSD. The liquidator connects the vault to an exchange to execute a swap at the exchange's current ADA to dUSD price, which we'll say is 0.76 dUSD per ADA. With the price applied, a swap of 429.4 ADA is made for the vault debt amount of 565 dUSD. The vault debt is now cleared and the remaining collateral of 570.6 is available for the vault owner to withdraw.
 
 \section{Governance}
 
-The role of Governance in a stablecoin ecosystem can range from the setting and tuning of parameters such as stability fees, liquidation ratios, and liquidation fees, to augmentation of core stablecoin functionality.
+The success of a stablecoin protocol is as dependent on the design of its internal business logic as its ability to adapt to market conditions and changes in the surrounding ecosystem. To enable the stablecoin to be adaptive, the protocol must be configurable and extensible in a secure manner by parties whose incentives align with the succees in growing and maintaining the stability of dUSD. Let's go into detail about how these incentives can guide self-interested parties towards actions which stabilize the protocol.
+
+\subsection{Incentives}
+
+The primary incentive of dUSD governance is to receive excess revenues from the buffer, called system surplus. Revenues from the buffer, as discussed above, come from the stability fee that accrues on all current vault debt and liquidity fee payments made from vault liquidations. As the amount of dUSD in the buffer increases, the system may reach a state of over-collatorization, which can put upward pressure on the USD value of dUSD thus destabilizing dUSD. To ensure stabilization against over-collatorization, the excess dUSD is purged from the vault and distributed to governance.
+
+The effect of the efforts of governance in acquiring system surplus helps to protect against under-collatorization of the buffer as well. During a significant price crash, the protocol may experience an influx of vault liquidations where the vaults collatoral is not enough to cover their respective dUSD debt. The buffer is then utilized to provide the outstanding dUSD to repay the vault debt and restore dUSD stability. This kind of event could irreparably de-stabilize dUSD if the buffer cannot provide the funds. To avoid this scenario from occurring, governance is incentivized to adjust the liquidation ratio so that it is high enough to ensure that liquidations occur well before the price drops low enough to render the vaults collatoral insufficient thus putting the funds in the buffer at risk.
+
+\subsection{Forms of Governance}
+
+Stablecoin governance can range from a single authority to a plurality of parties representing various interests. We'll outline a few governance models that
+
+\subsubsection{Admin}
+The most primitive form of governance in the protocol is that of a single administrator, a user that is granted the sole permission to modify system parameters and is the sole beneficiary to system surplus. In this governance model, one entity can excercise the most direct form of decision making and thus can make or break the protocol. The effectiveness of this kind of system relies on the administrator's attentiveness and responsiveness to changes in market conditions and protocol usage. As the protocol scales, the requirements of an administrator will grow more demanding. The administrator will also need to actively build and maintain trust with the dUSD holders and vault owners.
+
+\subsubsection{One Token One Vote}
+To distribute the responsibilities of governance from one individual to many, governance tokens are authorized and issued to willing participants. A participant's total amount of governance tokens represents the stake they have in decision making and system surplus. A user can employ their governance tokens to vote on changes to the protocol where the majority pool of tokens wins the vote. This system replaces the single point of failure inherent to the administrator governance model with a plurality of users that all have a vested interest in the stability of dUSD.
 
 \section{Conclusion}
 \begin{flushleft}
