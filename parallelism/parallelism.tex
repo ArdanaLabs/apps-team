@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 
 \title{Parallel transaction processing for decentralized exchange smart contracts on the Cardano blockchain}
-\author{Morgan Thomas / Ardana Labs / Platonic Systems}
+\author{Morgan Thomas / Ardana Labs / Platonic.Systems}
 
 \begin{document}
 
@@ -17,159 +17,96 @@
 
 \section{Context}
 
-Cardano smart contracts support at most one transaction per block\footnote{
+Cardano smart contracts support, at most, one transaction per block\footnote{
   The Cardano blockchain is built on an EUTXO system.
   This means that each smart contract's state is represented by a UTXO.
-  Any transaction which updates such state, consumes this UTXO and produces a
-  new UTXO.
-  Therefore, the next transaction updating the state must wait for the former
-  transaction to be done, so it can consume the resulting UTXO.
-  This is why transactions updating the same smart contract must be executed
-  sequentially.
-}.
-This translates to roughly three transactions per minute at most,
-which is not enough to support applications such as a decentralized exchange (DEX).
+  Any transaction which updates the contract's state consumes this UTXO and produces a
+  new UTXO. Under these constraints, transactions that update the contract must be executed sequentially.
+  In other words, the next transaction in the queue must wait for the previous
+  transaction to conclude so it can consume the resulting UTXO.}.
+This means that the system can only execute, at most, three transactions per
+minute, which is not enough to support applications such as a decentralized
+exchange (DEX).
 
-In order to solve this, one can start by launching a Cardano DEX on top of
+To solve this problem, one can start by launching a Cardano DEX on top of
 \href{https://orbisprotocol.com/}{Orbis}, a second layer solution based on
 Zero-Knowledge Rollups.
-This project will increase Cardano's transaction throughput to thousands of
+The Orbis project is designed to increase Cardano's transaction throughput to thousands of
 transactions per second.
 However, the Orbis project is limited in its sequential transaction throughput.
 In this paper, we will investigate a possible workaround for this limitation.
 Though the focus is on the decentralized exchange application, some lessons may
-be applicable to other applications also.
+be applicable to other projects as well.
 
-The limitation of one transaction per block per contract instance brings us to
-the idea to use more than one contract instance to increase the throughput.
-This poses the question how we can structure a contract made up of multiple
-instances in such a way that the various instances work together to create a
-unified result.
+The limitation of one transaction per block per contract instance suggests that using more than one contract instance will allow us to increase throughput.
+This possibility behooves us to ask how we can structure a contract composed of multiple
+instances in a way that produces a unified result.
 
-I will start into this by presenting a simplified model of a DEX contract which we can use to study the issue at a high level.
-The contract has three endpoints: one to execute a trade, one to add funds, and one to remove funds. There are $n$ distinct
-assets $a_1,...,a_n$ in the liquidity pool. In addition, there is a liquidity pool token asset which liquidity
-providers receive in exchange for depositing funds. There is a set $S$ of contract states and a function $\texttt{balances} : S \to \mathbb{R}^n$
-which extracts the current balances of the assets from the states. There is an invariant function $I : S \to \mathbb{R}$
+I will start by presenting a simplified DEX contract model, which we can use to study the issue at a high level.
+
+The contract has three endpoints: one to execute a trade, one to add funds, and one to remove funds. There are $n$ distinct assets $a_1,...,a_n$ in the liquidity pool, along with a liquidity pool token asset that liquidity providers receive in exchange for depositing funds. The DEX contains a set $S$ of contract states and a function $\texttt{balances} : S \to \mathbb{R}^n$,
+which extracts the current asset balances from the states. There is also an invariant function $I : S \to \mathbb{R}$,
 such that for all states $s \in S$ which are attainable, the invariant equation $I(s) = 0$ holds true.
-In other words: for initial state $s_0$, $I(s_0) = 0$ holds true. And for any $s$ where there exists a transaction sending $s$ to $s'$, if $I(s) = 0$ then $I(s') = 0$
+In other words, for initial state $s_0$, $I(s_0) = 0$ holds true. And for any $s$ where there exists a transaction sending $s$ to $s'$, if $I(s) = 0$ then $I(s') = 0$
 
-The pricing of trades is such that if the balance of asset $a_i$ gets lower relative to the other assets
-in the pool, then a trade for $a_i$ gets more
-expensive relative to a trade for another asset, and vice versa, if the balance of $a_i$ gets relatively higher
-then a trade for $a_i$ gets relatively cheaper. The pricing of trades is determined by solving the invariant equation.
+The pricing of trades is such that if the balance of asset $a_i$ decreases relative to the other assets in the pool, then a trade for $a_i$ becomes more
+expensive relative to a trade for another asset, and vice versa; if the balance of $a_i$ becomes relatively higher, then a trade for $a_i$ becomes relatively cheaper. The pricing of trades is determined by solving the invariant equation.
 
-When the user adds liquidity, they get rewarded the most liquidity pool tokens for depositing assets which
-bring the proportions of assets in the pool closest to the ideal which the pool ``wants.'' The closer their
-deposit is to this ideal type of deposit which the pool ``wants,'' the more liquidity pool tokens they get. The
-amounts of the liquidity token rewards are determined by solving the invariant equation.
+When the user adds liquidity to this system, they are rewarded liquidity pool tokens based on how close their deposit brings the proportion of assets in the pool to its ideal level. The closer their deposit matches this ideal, the more liquidity pool tokens they receive. The number of liquidity tokens generated is determined by solving the invariant equation.
 
-When the user removes liquidity, they don't get a choice in what assets they receive. They receive a share of
-each asset held in the pool proportional to the amount of liquidity tokens they are redeeming divided by
-the total amount of liquidity tokens in existence.
+When the user removes liquidity, they do not get to choose which assets they receive. Instead, they automatically receive a share of each asset held in the pool proportional to the amount of liquidity tokens they are redeeming, divided by the total amount of liquidity tokens in existence. 
 
 \section{Strategy}
 
-Our strategy is to create many copies of the same DEX contract and assemble them using off-chain software into
-an abstraction of a single pool. They appear from the perspective of end users to be a single pool while in
-fact they are independent pools which do not communicate or coordinate with each other. They share a single
-liquidity token asset class.
+Our strategy for increasing transaction throughput is to create many copies of the same DEX contract and assemble them into a single abstraction using off-chain software. From the end-users' perspective, these copies appear to be a single pool, while, in fact, they are independent pools that do not communicate or coordinate with each other. However, they share a single liquidity token asset class.
 
-Cross-pool arbitrage ensures that the liquidity tokens can be priced consistently,
-because if liquidity tokens are worth substantially more in one pool than in another pool, then arbitrageurs
-will add liquidity to a pool where liquidity tokens are worth less and redeem those liquidity tokens into
-a pool where they are worth more. We need to check that this type of arbitrage will in fact cause the
-liquidity token prices in the different pools to converge.
+Cross-pool arbitrage ensures that the liquidity tokens can be priced consistently. If liquidity tokens are worth substantially more in one pool than in another, then arbitrageurs
+will add liquidity to the pool where the tokens are worth less and redeem them in
+a pool where they are worth more. We need to check that this type of arbitrage will, in fact, cause the liquidity token prices among the different pools to converge.
 
-Cross-pool arbitrage also ensures that the assets in the pools can be priced consistently across pools,
-because if the prices in one pool are substantially different than in another pool, then arbitrageurs
-will use instant arbitrage swaps which will cause the prices in the different pools to converge.
+Cross-pool arbitrage also ensures that assets can be priced consistently across pools.
+If the prices in one pool differ substantially from another pool's, then arbitrageurs
+will resort to instant arbitrage swaps, which should cause the prices among the different pools to converge.
 
-Each pool will have a limit on its size (i.e., amount of liquidity). The limit can be different for different pools.
-This is done to ensure that the pool sizes cannot get too far out of
-balance. It is bad if some pools have very little liquidity and some pools have way too much liquidity,
-because this prevents swaps from being done in parallel in practice even though in theory the set of
-pools can support as many transactions per block as there are pools. At any given time there is a limit
-on how much liquidity can be in the system, which is the sum of the limits of the sizes of the pools.
-If this limit is close to the amount of liquidity in the system, then it ensures that almost every pool has
-close to its maximum amount of liquidity, which means that almost no pools have way too much liquidity
-or way too little liquidity, which means that the goal of supporting parallel transactions is being reached.
+Each pool will have a limit on its size (i.e., amount of liquidity). The limit can vary from pool to pool. This feature ensures that the pool sizes cannot get too far out of
+balance. If some pools have very little liquidity and some pools have too much liquidity,
+this prevents swaps from being done in parallel—even though the set of
+pools, in theory, can support as many transactions per block as there are pools. 
 
-There are many different options in how to implement this idea.
+At any given time, there is a limit on how much liquidity can exist within the system. The limit equals the sum of the pools' size limits. If the amount of liquidity in the system comes close to reaching this limit, then it ensures that nearly every pool contains its maximum amount of liquidity. This means that the pools are in balance, with almost none having too much or too little liquidity, which fulfills the goal of supporting parallel transactions.
 
-There are different options for how we can set the
-size limits. The limit can be the same for each pool, or, probably more usefully, the limits can be different
-for different pools, with a small number of large pools to support large swaps, and a larger number of small
-pools to support small swaps.
+There are many different ways to implement this feature.
 
-There are different options for when and how we can increase the limit on liquidity in the system. We can say
-that when the liquidity limit is reached, then we add more pools automatically, so that more liquidity
-can be added. We can say that human intervention is required to increase the liquidity limit, by increasing
-the limits on existing pools and/or adding new pools. If we say that human intervention is required, then
-that intervention can be voted on by the decentralized governance protocol, or it can be done in a centralized
-fashion by the exchange operators.
+We have options for how we can set the pools' size limits. The limit can be the same for each pool, or, likely more useful, the limits can vary across pools. Within this variation, we would have a small number of large pools to support large swaps and a larger number of small pools to support small swaps.
 
-These different options for increasing the limit on liquidity have different consequences. If we do not require
-human intervention to increase the liquidity limit, then liquidity can increase without limit and users can
-always add liquidity. If we do require human intervention to increase the liquidity limit, then it sets a lower
-bound (relative to the trading volume) on liquidity utilization and thus on liquidity provider profit.
-This could be a desirable property, but the consequences are hard to anticipate because it hasn't been
-tried before by other DEX projects as far as we know. It could also have legal ramifications, and those
-ramifications could be different depending on whether it is done by the decentralized governance protocol
-or by the exchange operators.
+There are also options for when and how we can increase the system's liquidity limit. We can say that when the liquidity limit is reached, we automatically add more pools or increase the existing pools' limits so that users can add more liquidity. In this case, we say that human intervention is required to increase the liquidity limit. If we say that human intervention is required, then that intervention can be voted on by the decentralized governance protocol, or it can be done in a centralized fashion by the exchange operators.
 
-There are different options in how to assemble the set of independent pools into an abstraction of a single
-pool for end users to interact with. The basic concept here is that when a user wishes to perform a transaction,
-the system will select a pool which is suitable for performing the transaction, in that it has sufficient
-funds to be a counterparty to the desired swap, or it has sufficient funds to redeem a certain amount of
-liquidity tokens, or it is sufficiently below its liquidity limit to add a certain amount of liquidity.
-It may be that a desired transaction is so large that it cannot be done against any pool, in which case
-it will be split up into pieces and those pieces will be executed against multiple different pools in
-order to achieve the result the user is looking for.
+These options for increasing the system's liquidity limit have different consequences. If human intervention is not required to increase the limit, then liquidity can increase indefinitely and users can always add liquidity. If we do require human intervention, then it sets a lower bound (relative to the trading volume) on liquidity utilization and, thus, on liquidity provider profit.
+This could be a desirable property, but the consequences are hard to anticipate because, as far as we know, it hasn't been tried before in other DEX projects. It could also have legal ramifications, which could differ depending on whether it is implemented by the decentralized governance protocol or by the exchange operators.
 
-Different pool selection algorithms are possible and we should provide pool selection algorithms
-which increase economic efficiency. A swap, for example, will execute at a different price on different
-pools, and we should select a pool which provides one of the better prices available. We should not
-necessarily select a pool which provides the best price, because that could lead to resource contention
-if that is (as will often the be the case) the best pool for multiple users' transactions. So for example,
-we can order the pools in the ordering relation ``provides a better price for this swap than,''
-and then select one in the best $x\%$ of all pools. An algorithm for pool selection which provides
-economic efficiency for the user also increases the efficiency of the market, because for example the
-best pool to do a swap against is also the pool which most needs that transaction to put it back into
-balance and make its prices regular compared to the other pools. Efficient pool selection for swaps
-does the same price regularization work which cross-pool arbitrage via swaps does.
+There are also options for how to assemble the set of independent pools into an abstraction of a single pool. The basic concept here is that when a user wishes to perform a transaction,
+the system will select a suitable pool with sufficient funds to be a counterparty to the desired swap, or one that has sufficient funds to redeem a certain amount of
+liquidity tokens, or one that is sufficiently below its liquidity limit to receive the user's liquidity.
+It may be that a desired transaction is so large that it cannot be executed against any single pool, in which case the transaction will be split into pieces, and those pieces will be executed against multiple pools to achieve the result the user is seeking.
 
-Similar principles will apply to other transactions besides swaps (namely, adding and removing liquidity).
-Some pools are better than others for performing a transaction against. We can order pools by the relation
-``is a better pool to do this transaction on than.'' We can select one of the better pools to do a transaction
-against. By doing so, we offer more economic efficiency for the user and also increase the efficiency of the
-market, because this does the same work that cross-pool arbitrageurs would do which ensures reasonably
-consistent liquidity token pricing. This is a claim that we should validate.
+Various pool selection algorithms are available, and we should provide algorithms
+that increase economic efficiency. A swap, for example, will execute at a different price in different pools, so we should select a pool which provides one of the better prices available. We should not necessarily select a pool which provides the *best* price, because that could lead to resource contention if that pool is (as will often the be the case) the best one for multiple users' transactions. So, for example, we can order the pools in the ordering relation ``provides a better price for this swap than,''
+and then select one in the best $x\%$ of all pools. 
 
-Users can, if they wish, choose which pool they perform a transaction against.
-We provide a means by which users can ignore the fact that there are many pools
-and experience all of them as one.  This includes a mechanism which
+A pool selection algorithm that provides economic efficiency for the user also increases the efficiency of the market. For example, the best pool to execute a swap against is also the pool that most needs the transaction to regulate its prices and put it back into balance with the other pools. In other words, efficient pool selection for swaps does the same price-regulating work that cross-pool arbitrage does. To select these pools, we can order them by the relation ``is a better pool to do this transaction on than.'' Similar principles will apply to other transactions as well: namely, adding and removing liquidity. 
+
+We provide a means by which users can ignore the reality of many pools
+and experience all of them as one. This includes a mechanism which
 automatically selects, behind the scenes, a pool or pools to perform their
-transaction against. It also includes mechanisms which produce unified prices
-for the assets in the pools and the liquidity tokens. However, users may if they
-wish also inspect the liquidity token prices and asset prices of the individual
-pools and choose specific pools to perform their transactions against. Arbitrage
-trading is an example of an activity which may benefit from doing this.  We
+transaction against. It also includes mechanisms that produce unified prices
+for assets and liquidity tokens. However, users can, if they wish, choose which pool they perform a transaction against. They may review the prices for liquidity tokens and assets among the individual pools and choose specific ones for their transaction. Arbitrage
+trading is just one example of an activity that may benefit from doing this. We
 cannot reasonably prevent users from interacting with the individual pools in
-any manner they choose to do, and so we need to design the system in a way where
-anything they can do by interacting with individual pools is not likely to
-disrupt the proper functioning of the system. The way in which this is to be
-achieved is by setting up the market in such a way that whatever it is in users'
-economic incentives to do by interacting with individual pools will also tend to
-increase the efficiency of the market. The opportunities we're aware of which
-are opened up by interacting with individual pools are in the nature of
-cross-pool arbitrage and hypothesized to increase the efficiency of the market
-by promoting consistency in prices across the different pools. The arbitrage
+any manner they choose, so we need to design the system in a way where
+their actions are not likely to disrupt the proper functioning of the system. We can achieve this by making it where users' interaction with individual pools, in pursuit of their economic interests, will tend to increase the market's efficiency. The opportunities opened up by interacting with individual pools are in the nature of
+cross-pool arbitrage and are hypothesized to increase market efficiency by promoting consistency in prices across the different pools. Arbitrage
 opportunities exploit price differences between the pools and have the tendency
-(or so we hypothesize) to flatten out those differences, causing the price
-differences to flatten out and the arbitrage opportunities to go away. The
-expected end result is a market where the price differences between the
-different pools are small enough that it is not profitable to arbitrage them
-away after accounting for transaction costs.
+(or so we hypothesize) to flatten out those differences, causing arbitrage opportunities to disappear. The expected end result is a market where the price differences between the
+various pools are small enough that arbitraging them away is not profitable after accounting for transaction costs.
 
 \end{document}
