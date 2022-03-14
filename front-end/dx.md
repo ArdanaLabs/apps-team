@@ -1,5 +1,6 @@
 # Developer experience
 
+- CI: Is everything relevant integrated? nix-build, deployment, run tests..
 - Which formatters?
   * HTML
   * CSS
@@ -20,12 +21,19 @@
     - "Nix works better"
     - Note: I think Nix shells might always have to be bash, for
       reproducibility. What would you like here?
+- Feedback loops
+  * Compile all code
+  * Run all tests
+  * `nix build` for deployment
+  * Set up a local frontend server
 - Staging environments
   * What will they be used for? How can we accomplish this?
   * What do we want in staging environments? `development`?
 - PR reviews
   * When you open a PR, ping the relevant parties right away. Let's not rely on
     Github notifications.
+  * I will only do a very rough sniff test. Mostly, I want to know what's going
+    on. You review each other's code, as thoroughly as possible.
   * Developers start their day with PR reviews, and don't do anything else until
     all PRs are reviewed
   * I will try to do the same to the extend possible, but keep in mind I have
