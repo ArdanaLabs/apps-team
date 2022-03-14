@@ -16,18 +16,19 @@ Workflow:
   * What are the acceptance criteria? This is a list of things which, if true,
     mean that the project is done and can go into production.
   * Turn the acceptance criteria into (descriptions of) tests
+    - Some acceptance criteria must be checked during PR review, could be
+      included as rules in a linter.. rather than being a machine test
 - Next step: Break down the project into subprojects or subfeatures
-  * As a rule of thumb, a subproject tends to be under 150 LoC
+  * As a rule of thumb, a subproject tends to be under 150 lines of code
   * Each subproject must be self-contained, i.e. it can be built and tested
-    without depending on things that aren't ready yet
+    without depending on things that aren't built yet
     - For example, the dUSD vaults depend on price oracles, so we start by
       building price oracles
-  * Each subproject must be tested, and the tests should be written before any
-    code, to make sure you
+  * Each subproject must be tested, and before you write code, you should
     - have a good design
-    - write tests
     - set up a proper feedback loop to see if/when you're done
-    - code is written such that it can be tested
+    - know how you will test things, so you write test-able code
+    - This usually means tests must be written before code
   * Each subproject/subfeature leads to a PR, to be reviewed by at least one
     person. If it touches any Nix code, a Nix engineer must review.
 
