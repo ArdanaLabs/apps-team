@@ -1,0 +1,19 @@
+== Security
+
+=== HTTP Headers
+
+* listen to https://wiki.owasp.org/index.php/OWASP_Secure_Headers_Project[OWASP] and https://observatory.mozilla.org/[Mozilla Observatory]
+* speaking of Mozilla Observatory, no project should be below A- in production
+
+==== Content Security Policy (CSP)
+
+* prefer `none` as `default-src`
+* do *not* use `unsafe-inline` or `unsafe-eval` content security policies
+
+==== Referrer Policy
+
+* do *not* use `unsafe-url` referrer policies
+
+==== Feature Policy
+
+* prefer disabling all unused APIs

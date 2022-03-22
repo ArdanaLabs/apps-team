@@ -1,0 +1,24 @@
+General Static Page Criteria
+============================
+:doctype: article
+:description: Criteria for all statically-hosted pages
+:sectnums:
+:toc:
+:webfonts!:
+
+These requirements are not specific to any project, however are relevant to *all* projects unless specified otherwise. Please always take these into consideration.
+
+== Tiers of pages
+
+While not everything fits neatly into just one specific category, here are three types of pages.
+
+Informational pages:: These pages have a primary purpose is to inform users about the product/service. They should be fast, SEO-optimized, highly accessible, and maintainable.
+Dynamic content pages:: These pages have more interactivity than a informational pages like charts/graphs, live content, or other data that is fetched from the server. However, the content that needs to be updated is usually siloed and rarely need to share state with other components.
+(Progressive) Web applications:: These types of pages require a lot of state management and shared state. They are highly interactive and require many more usage of browser APIs (such as offline support, geolocation, notification, etc.). These requirements change the name from a “page” to an application as these types of pages mimic stardard desktop/mobile application while having the portability of the web.
+
+include::general/accessibility.adoc[]
+include::general/performance.adoc[]
+include::general/security.adoc[]
+include::general/privacy.adoc[]
+include::general/legal.adoc[]
+include::general/maintainability.adoc[]
