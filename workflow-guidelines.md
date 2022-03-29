@@ -30,6 +30,8 @@ Workflow:
     - code is written such that it can be tested
   * Each subproject/subfeature leads to a PR, to be reviewed by at least one
     person. If it touches any Nix code, a Nix engineer must review.
+    - When you create a PR, please ping your reviewers, to make sure they're
+      aware. Too many people turn off GitHub notifications to rely on those.
 
 GitHub branches:
 - For each project you start working on, create a feature branch with a sensible
