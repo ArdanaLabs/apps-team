@@ -22,4 +22,4 @@ Good static site generator and its workflow should::
 * Probably not require building the static generator binary
 * Not focus solely on building blogs
 * Not be limited to only Markdown + HTML (Pug, AsciiDoc, LaTeX, etc. can be your friends)
-* Not require a masters in category theory to use (e.g. content editors should be required to know Haskell or Stack to tweak the system or make a new page/post).
+* Not require a masters in category theory to use (e.g. content editors should *not* be required to know Haskell or Stack to tweak the system or make a new page/post).
