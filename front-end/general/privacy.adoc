@@ -1,9 +1,10 @@
-== Privacy
+Privacy
+=======
 
-=== General
+== General
 
 * provide a clear privacy policy when applicable
 
-===  Content Delivery Networks 
+==  Content Delivery Networks 
 
 * do *not* connect to public CDNs unless strictly necessary; the https://httptoolkit.tech/blog/public-cdn-risks/[risks] don’t warrant the dubious value in a world where browsers are doing first-party isolation

@@ -1,17 +1,18 @@
-== Legal
+Legal
+=====
 
-=== Follow laws
+== Follow laws
 
 * COPPA
 * GDPR, CCPA, CPRA
 * etc. (IANAL)
 
-=== Explicit documents with links
+== Explicit documents with links
 
 * provide terms of service (ToS) when applicable
 * provide a privacy policy when applicable
 
-=== Respect creators
+== Respect creators
 
 * attribute all assets that require it (e.g. CC BY content)
 * don’t strip license data just to save a few bytes

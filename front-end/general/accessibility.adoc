@@ -1,10 +1,11 @@
-== Accessibility
+Accessibility
+=============
 
-=== Avoid overriding user agent defaults
+== Avoid overriding user agent defaults
 
 * unless in an application or a context where content will be lost, do *not* open links with `target="_blank"`
 
-=== Respect user request and requirements
+== Respect user request and requirements
 
 * provide an experience tailored to mobile devices and small windows as well as large (do *not* make wild assumptions based on screen size: a small window is not mobile, a large window do not always have pointers, etc.)
 * respect users wishing for reduced motion
@@ -12,17 +13,17 @@
 * respect a user agent’s requested language when possible
 * provide necessary ARIA when building custom components
 
-=== Error handling
+== Error handling
 
 * handle errors with useful, actionable error messages
 
-=== Noscript
+== Noscript
 
 * informational pages should be mostly, if not fully, accessibly without JavaScript; this helps users in TUI browser, with script blockers, and most importantly with search engines that aren’t as sophisticated to index the page
 * dynamic content pages should include message about the progressive enhancements they are missing
 * the `<noscript>` experience should be tailored to the component or product as a whole and *not* just say a generic: This page requires JavaScript
 
-=== SEO
+== SEO
 
 * related to the Noscript category, informational pages need to be easy to index for all major search engines
 * especially with informational pages, microdata should be provided to get a better experience from the search results (and likely a better ranking)
