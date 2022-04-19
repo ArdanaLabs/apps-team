@@ -1,5 +1,11 @@
 Static Site Generator Criteria
 ==============================
+:doctype: article
+:description: Criteria for all statically-hosted pages
+:sectnums:
+:toc:
+:toclevels: 2
+:webfonts!:
 
 Static site generator can automate adding ‘dynamic’ content to static pages (and sometimes assets too) as well as help users create pages that can be hosted on a CDN. Because of the nature of how static pages are maintained over a long period of time, generally host content that is seldom updated that when updates are required need to happen with quick turnaround, and content editors may come from any vaguely-technical background (not a specific one), a static site generator require different features than other front-end software.
 
