@@ -13,9 +13,17 @@ Accessibility
 * respect a user agent’s requested language when possible
 * provide necessary ARIA when building custom components
 
+== Logical DOM order
+
+* The DOM and the design are not the same thing. The DOM should flow in a logical order
+
+TIP: An easy way to test this is in a Gecko-based browser go to *View → Page Style → No style* which will disable the page styles to let you see how the elements are layed out
+
 == Error handling
 
 * handle errors with useful, actionable error messages
+
+TIP: We can use data modeling to ensure errors are handled
 
 == Noscript
 
@@ -23,10 +31,13 @@ Accessibility
 * dynamic content pages should include message about the progressive enhancements they are missing
 * the `<noscript>` experience should be tailored to the component or product as a whole and *not* just say a generic: This page requires JavaScript
 
+TIP: As a good practice, any informational-style site should be built first with noscript principles of pure HTML and CSS with JavaScript as an enhancement because this will generally lead to a simpler design. Be reasonable and do not take this concept too far though; don’t start reaching checkbox hacks or similar just to avoid JavaScript
+
 == SEO
 
 * related to the Noscript category, informational pages need to be easy to index for all major search engines
 * especially with informational pages, microdata should be provided to get a better experience from the search results (and likely a better ranking)
 * have metadata for social sharing (images, descriptions, etc.)
-* have `<img>` alt tags that are informative *or* are empty for “decorative images”
-* text should match the casing for written English; if all-caps or lowercase is desired, use CSS
+* all `<img>`s should have `alt` tags; they should be informative *or* are empty for “decorative images” (i.e. `<img alt="">`), they should *not* say what the image is of
+** Read more: https://www.w3.org/WAI/tutorials/images/decorative/
+* text should match the casing for written English (or whatever document languague); if an uppercase, small-caps or lowercase aesthetic is desired, use CSS
