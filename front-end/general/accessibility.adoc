@@ -3,7 +3,7 @@ Accessibility
 
 == Avoid overriding user agent defaults
 
-* unless in an application or a context where content will be lost, do *not* open links with `target="_blank"`
+* unless in an application or a context where content will be lost, do *not* open links with `target="_blank"` (https://css-tricks.com/use-target_blank/[more info])
 
 == Respect user request and requirements
 
