@@ -40,5 +40,13 @@ GitHub branches:
 - For each sub-feature, you can create a PR from the sub-feature to the feature
   branch and ping the right people for a review
 
+Notes:
+- TDD doesn't deny design-first, it enforces it
+  * It is possible to start implementing something without fully thinking
+    through the design first. Testing, not so much.
+- I have found the 150 LoC/PR idea a good rule of thumb. Not everything fits
+  into that.
+  * The use of feature and subfeature branches can be very productive
+
 
 
