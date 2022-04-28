@@ -33,10 +33,10 @@ Updates in system parameters will spend the UTXO being referenced by protocol ac
 
 \section{Vault UTXOs}
 
-Vaults are essentially script UTXOs that lock ADA and carry in the datum a record of the amount of dUSD minted and the amount of dUSD burned. A vault owner interacts with the vault through redeemer action consisting of the following: deposit ADA to vault, withdraw ADA from vault, mint/withdraw dUSD from vault, and pay dUSD to vault. 
+Vaults are essentially script UTXOs that lock ADA and carry in the datum a record of the amount of dUSD minted and the amount of dUSD burned. A vault owner interacts with the vault through redeemer actions consisting of the following: deposit ADA to vault, withdraw ADA from vault, mint/withdraw dUSD from vault, and pay dUSD to vault. 
 
 The parties needed to act explicitly in a vault upgrade are both the protocol administrator and a vault owner. To upgrade a vault, a protocol administrator will transfer the vault admin (or perhaps developer) NFT to a new script address representing the hash of the updated vault script. The vault owners will then be made aware of this through searching the chain index and finding the vault admin NFT at the new address. This is similar to moving a release tag to a newer software distribution. The vault owners will then call the upgrade redeemer which supports a secure transfer of the vault UTXO to the new scripting address.
 
-The effects of this update should be non-breaking to the protocol. Vaults can still be managed and created at older scripting addresses but the vault owners will be incentivized to upgrade to benefit from the security patches and features the new vault script will provide.
+The effects of this update should be non-breaking to the protocol. Vaults can still be managed and created at older scripting addresses but the vault owners will be incentivized to upgrade to benefit from the security patches and features the new vault script will provide. Monetary upgrade incentives could also be devised, such as a temporary lowering of stability fees.
 
 \end{document}

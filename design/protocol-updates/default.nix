@@ -12,7 +12,7 @@ in
       mkdir -p $out
       HOME=./. pdflatex doc.tex
       HOME=./. pdflatex doc.tex
-      cp doc.pdf "$out/peg-stabilization.pdf"
+      cp doc.pdf "$out/protocol-updates.pdf"
     '';
     installPhase = ''
       echo done
