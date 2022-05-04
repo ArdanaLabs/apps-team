@@ -48,5 +48,18 @@ Notes:
   into that.
   * The use of feature and subfeature branches can be very productive
 
+# Frontend workflow
+
+All feature PRs will point to `staging`. Once every while, a PR can be created
+from `staging` to `master`. Whenever this happens, Hao will go through the QA
+process, making sure the new version of the website is ready to go into
+production. The QA process includes both looking at generated HTML/CSS/JS and
+the deployed staging website (on different browser).
+
+When someone notices a bug (in production or staging), someone from the frontend
+team should get in touch to set up a bug report together with the person who
+first noticed the bug. A regression test should be set up (either an automated
+test, or in the QA process).
+
 
 
