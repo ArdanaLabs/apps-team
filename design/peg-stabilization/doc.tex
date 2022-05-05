@@ -1,0 +1,94 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{outlines}
+
+\title{Peg Stabilization}
+\author{Ardana Labs / Platonic.Systems}
+
+\begin{document}
+
+\maketitle
+
+A fundamental characteristic of a stablecoin is it's tendency to return to a set price despite changing market conditions and dynamics in the supply and demand of the stablecoin. In order to ensure the stablecoin exhibits the tendency towards a set price, we must define a mechanism which can correct downward and upward price deviation. Below, we will define the conditions necessary to warrant the usage of a stabilization mechanism and the components and algorithm that will push the price back to peg. We will be referring to the stablecoin as dUSD and it's pegged currency to USD.
+
+\section{When to Stabilize}
+
+When people are exchanging assets for dUSD and vice versa, they are agreeing on the pegged value of the asset and transacting as if the stablecoin were USD itself. Once the receiving participant wants to cash out, they will go to a centralized exchange and seek an order to sell the dUSD for it's equivalent quantity in USD. If they cannot fulfill the 1:1 order and have to exchange their dUSD for less USD, the stablecoin is considered off-peg. The degree at which this price deviates from the peg and how long this deviation has occurred are parameters which should trigger the stabilization mechanism. Let's explore below the two cases which should warrant peg stabilization and why.  
+
+\subsection{Price Below Peg}
+
+Let's say Anna is selling a vintage mink coat for \$1000. She will list the coat for 1000 dUSD, and trust that the 1000 dUSD she receives for the coat will be redeemable for \$1000. If she were to go to an exchange and see that dUSD is listed for \$0.97 she would be reluctant to cash out because that would mean she would be losing \$30 dollars she had assumed was included in the price when she listed the coat. Anna would instead want to either wait for the price of dUSD to return to \$1.00 or try to find another asset to exchange for dUSD which would correct the value lost. Once a certain amount of time passes and Anna is unable to fulfill her order, the stabilization mechanism will trigger.
+
+\subsection{Price Above Peg}
+
+Now let's consider the scenario where someone, let's say Micah, wants to purchase the coat Anna listed for 1000 dUSD, but he needs dUSD to do so. He goes to an exchange and attempts to buy 1000 dUSD for \$1000 but his order does not get fulfilled because people are only willing to sell dUSD for \$1.03. In order for Micah to buy the coat he must choose between the following: spend an extra \$30 to get ahold of 1000 dUSD, wait for someone to sell him the dUSD for an equal quantity of USD, or he can buy another asset which he can then exchange for dUSD without losing any value. In these conditions, if the degree of deviation of the price to the peg is significant enough and this deviation has been occurring for a certain amount of time, the stabilization mechanism will trigger. 
+
+\section{Peg Stabilization Mechanism}
+
+The stabilization mechanism is a system that actively responds to events in peg deviation and adjusts the circulating supply of dUSD through minting and burning to drive it's value back to peg. The mechanism can be called at any point in time but will only execute market actions if the price is deviating from the peg.
+
+\subsection{Capital Requirements}
+To enable the stabilization mechanism to perform below-peg price correction, enough capital needs to be available to buy excess dUSD from the market in exchange for ADA and burned. This capital can be accumulated through exchanging the dUSD collected from vault stability fees for ADA and/or from dedicated protocol reserves.
+
+\subsection{Parameters}
+
+As expressed above, system parameters will determine the conditions necessary for the stabilization mechanism to execute. We define those as the following:
+
+\begin{itemize}
+  \item Lower peg bound, as in the minimum we allow the price to deviate.
+  \item Upper peg bound, as in the maximum we allow the price to deviate.
+  \item Deviation time threshold, as in max time the price can deviate from the peg for peg stabilization to occur. 
+  \item Stabilization Interval, as in the length of time between market actions.
+  \item Debt Ceiling (@TODO this might be unnecessary if the algorithm is careful enough)
+\end{itemize}
+
+
+\subsection{Temporal Inputs}
+
+Using data from exchanges, at any given point in time up to the present, we can know the following:
+\begin{itemize}
+  \item Price of dUSD in USD
+  \item Price of ADA in USD
+  \item Circulating supply of dUSD
+  \item 24 hour trading volume (@TODO including this here because it's commonly listed data that could prove useful in making the algorithm smarter)
+\end{itemize}
+
+\subsection{Sizing}
+
+When the price of dUSD in USD has crossed the upper or lower peg bound for longer than the threshold, the stabilization mechanism will adjust the circulating supply. We calculate this quantity of stablecoin to burn/mint with the following equation:
+
+\begin{equation*}
+    quantity = supply * (price - 1)
+\end{equation*}
+
+\subsection{Market Actions}
+
+If the supply adjustment calculated above is negative, the mechanism will attempt to purchase the quantity amount of dUSD and burn it to directly reduce the circulating supply. It accomplishes this by submitting an order of the quantity amount of dUSD for it's 1:1 USD value in ADA. This ADA is pulled from the protocol's reserved. People will be incentivized to purchase the ADA in dUSD due to the asking price of the ADA being cheaper than what they could get if they were to exchange ADA directly for dUSD.
+
+If the quantity is positive, the mechanism mints the quantity amount and sells it for \$1.00 worth of ADA at it's current price. Because this price is cheaper than the market price, people will be incentivized to purchase the allotted dUSD. With more dUSD entering the markets at a discounted price, the price should begin to return to peg.
+
+\subsection{The Algorithm}
+
+Given these parameters, inputs, and actions, we can now define an algorithm for how peg stabilization will be performed. The algorithm will execute once every stabilization interval. The steps are as follows:
+
+\begin{enumerate}
+    \item Close all open orders (buying and/or selling dUSD from past runs) 
+    \item Check if the current price is within peg bounds. If so, exit. If not, continue.
+    \item After calculating supply adjustment quantity.
+        \begin{itemize}
+            \item If quantity is positive, initiate mint and sell order of dUSD of that quantity.
+            \item if quantity is negative, initiate a buy and burn order of dUSD of that quantity.
+        \end{itemize}
+\end{enumerate}
+
+
+\section{Conclusion}
+
+We've described above a mechanism that can respond to deviations in stablecoin price and manipulate it's circulating supply to bring it's market price back to peg. Such a mechanism is essential to a protocol like dUSD, where the core value proposition relies on a strong price correlation to it's pegged assets. This model can be applied to any system that has control of it's circulating supply through a monetary scripting environment where value can be locked based on the conditions described above.
+
+\end{document}

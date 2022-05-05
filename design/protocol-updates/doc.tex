@@ -1,0 +1,42 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{outlines}
+
+\title{Protocol Updates}
+\author{Ardana Labs / Platonic.Systems}
+
+\begin{document}
+
+\maketitle
+
+When devising a solution for how a protocol update occurs, it's best to break down what can be updated, who can update it, how frequently it will be updated, and to what effect the update will have on protocol activity.
+
+\section{Price Oracle NFT UTXO}
+
+Due to its non-fungible nature, the NFT itself will never be updated unless the underlying blockchain protocol updates. However, the NFT will always be within a UTXO holding a datum of the latest USD to ADA price data. When the price data needs to be updated, the NFT UTXO will be spent to form a new UTXO with new price data attached.
+
+The operation of deploying a new UTXO with updated price data will occur every hour and will require a trusted price administrator to construct, sign, and submit the transaction spending the NFT and providing the price data.
+
+All protocol actors relying on transactions which contain a reference to the NFT’s UTXO will need to update their reference inputs with the new UTXO containing the unspent price oracle NFT. PAB users querying the chain index to get the UTXO containing the NFT should not have to update anything as the minting policy and token reference should remain the same.
+
+\section{System Parameter NFT UTXO}
+Like the price oracle, system parameter data will exist in a datum value in the same UTXO housing an NFT authorizing the UTXO to provide said data to the protocol.
+
+A trusted system administrator will be responsible for pushing the transaction which spends the NFT and updates the price data. Certainty in how often the system parameters are updated is dependent on the level of volatility in the USD to ADA price as well as peg fluctuations on exchanges and thus will vary. It is best to assume that updates to this data will occur on a weekly basis when the protocol is launched and become less frequent as the protocol scales.
+
+Updates in system parameters will spend the UTXO being referenced by protocol activities, creating a new UTXO that contains the System Parameter NFT and the updated system parameter data. Like with Price Oracle updates, protocol activity referencing the old UTXO will need to update to the new reference.
+
+\section{Vault UTXOs}
+
+Vaults are essentially script UTXOs that lock ADA and carry in the datum a record of the amount of dUSD minted and the amount of dUSD burned. A vault owner interacts with the vault through redeemer actions consisting of the following: deposit ADA to vault, withdraw ADA from vault, mint/withdraw dUSD from vault, and pay dUSD to vault. 
+
+The parties needed to act explicitly in a vault upgrade are both the protocol administrator and a vault owner. To upgrade a vault, a protocol administrator will transfer the vault admin (or perhaps developer) NFT to a new script address representing the hash of the updated vault script. The vault owners will then be made aware of this through searching the chain index and finding the vault admin NFT at the new address. This is similar to moving a release tag to a newer software distribution. The vault owners will then call the upgrade redeemer which supports a secure transfer of the vault UTXO to the new scripting address.
+
+The effects of this update should be non-breaking to the protocol. Vaults can still be managed and created at older scripting addresses but the vault owners will be incentivized to upgrade to benefit from the security patches and features the new vault script will provide. Monetary upgrade incentives could also be devised, such as a temporary lowering of stability fees.
+
+\end{document}
