@@ -1,0 +1,61 @@
+Quality Assuarce (QA)
+=====================
+:doctype: article
+:description: Front-end quality assurance criteria
+:sectnums:
+:webfonts!:
+
+== Browsers to support
+
+=== Informational pages
+
+ES5 support(?), last 4 versions, Firefox ESR, with bonus points for ‘acceptable’ Lynx, w3m, Netsurf, and SerenityOS’s browser support (`@supports` should be your friend)
+
+Open to switching the ES5 support, but this will take points away from the high-accessibly part of the site where some ECMAScript parsers for SEO might be quite old. That this is annoying might keep the level of complexity down on these types of sites. Using newer APIs is fine, though they can be checked or polyfilled.
+
+=== Dynamic pages
+
+*(missing on purpose; reasonably land between these two extremes)*
+
+=== Web applications
+
+Last 2 versions, Firefox ESR
+
+== When to fully manually test
+
+* On brand new projects is ready for staging
+* When any part of the base layout changes
+* When a new element breaks out of the base layout (think `position: fixed`, modals, etc.)
+
+What this implies is that once the base is in place, it hopefully doesn’t need to be done too often
+
+=== What is is “fully manually test”?
+
+The browser Matrix needs to be tested (Blink, Webkit, Gecko)
+
+== Automated browser testing
+
+=== WebDriver
+
+Whatever drivers are used should be W3C-compliant and support Blink, Webkit, and Gecko engines. Screenshot tests should have the ability to fuzz differences because it’s 100% not possible to get a fully consistent test setup while still upgrading browsers, drivers, font engines, and all the many machines.
+
+=== How much to test
+
+Browser tests are slow, complicated, and sometimes flaky compared to other types of tests. As such, what is tested should be tactical over full-coverage as if the tests take a long time to run and fail, people will skip it or be too impatient with CI.
+
+Things like: does authentication work? Does the main navigation work? Does the most important flows work? And do these work on various browsers sizes.
+
+=== How to select element
+
+XPath or CSS selectors based on ARIA and data attributes are much preferred to IDs and CSS classes should probably be straight-up avoided.
+
+=== Should all engines be tested all the time?
+
+Good question. Maybe not worth it on all tests as browsers have converged in more recent times, but as a smoke test, at least one test should cover as much as possible. Unsure on the answer.
+
+== What to think about when developing then?
+
+* Create elements with test-ready selectors
+* While building, test at different sizes
+* When ready to do a merge request with a new component, test the three main browser engines on your machine
+* If messing with the base layout, be very thorough in your test and perhaps ask others to help poke at it

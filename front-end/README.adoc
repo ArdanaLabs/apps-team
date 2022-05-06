@@ -21,6 +21,7 @@ $ asciidoctor --backend html5 README.adoc
 // https://github.com/github/markup/issues/1095
 // However, rendering with AsciiDoctor will still works & links can be clicked
 include::general.adoc[leveloffset=+1]
+include::quality-assurance.adoc[leveloffset=+1]
 include::static-site-generator.adoc[leveloffset=+1]
 
 // TODO: specific pages
