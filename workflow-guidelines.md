@@ -61,5 +61,24 @@ team should get in touch to set up a bug report together with the person who
 first noticed the bug. A regression test should be set up (either an automated
 test, or in the QA process).
 
+Given the different expertises in the frontend team, we have decided to split
+the frontend in half:
+- The first half contains all the structure and design of the websites, but no
+  business logic
+  * Built by Greg
+  * Tooling: EJS + esbuild, to generate HTML/CSS-based websites with a bit of JS
+  * The result of this work is the single source of truth on what the HTML/CSS
+    of the production website should be
+- The second half is the business logic
+  * Built by Hao and Peter
+  * These components will be designed by Greg first, but without the business
+    logic
+  * The components which require business logic, will be rebuilt in Purescript
+    to generate the exact same HTML as what Greg wrote, but with business logic
+- This way everyone can work through tools they are more comfortable and
+  familiar with (compared to fp-ts), and build great websites
+- Note: The landing pages don't contain any business logic, so they will be
+  entirely built by Greg
+
 
 
