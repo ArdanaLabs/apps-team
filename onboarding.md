@@ -67,8 +67,8 @@ here, to help the rest of the team.
 Anyone in the team is happy to help you out on anything they can. However, it
 seems useful to give you an idea whom to reach out to if you have an issue with
 a specific topic. Hence this list:
-- Nix: Lee (`nixinator` on Discord) / Matthew (`matthewcroughan`), from the
-  Ardana Nix team
+- Nix: Srid (great guy from Smart Contracts, knows a lot of Nix) / John (Ardana
+  Nix team lead)
 - Plutus: Dan Firth (`locallycompact`), from the Ardana Orbis team
 - PAB E2E testing: Tommy (`tbidne`), from the Ardana Apps team
 - Frontend: Kai (`kai.dao.platonic`), from the Ardana Frontend team
