@@ -1,0 +1,28 @@
+Front-end Criteria
+==================
+:doctype: book
+:description: Generalized and specific front-end criteria for Ardana Projects
+:url-repo: https://github.com/ArdanaLabs/apps-team
+:toc:
+:toclevels: 2
+:sectnums:
+:webfonts!:
+
+It’s common for teams to separate the concerns of the https://en.wikipedia.org/wiki/Frontend_and_backend[front-end and back-end] so specialists can focus as the user interface (UI) can be developed independent of the server, ati it’s models and templating systems. Like many teams out there, our front-ends will often be built as https://en.wikipedia.org/wiki/Static_web_page[static web pages] and hosted on a https://en.wikipedia.org/wiki/Content_delivery_network[content delivery network] (CDN) to host content on local servers closer to the user. This is typically faster, cheaper, and has some security benefits. These are our guidelines to our projects.
+
+.To build the full documentation (or any other specific file)
+[source,shell-session]
+----
+$ asciidoctor --backend html5 README.adoc
+----
+
+// Despite GitLab support since 2019, and a open issue from 2017 GitHub does 
+// not support `includes` for importing content to a single document
+// https://github.com/github/markup/issues/1095
+// However, rendering with AsciiDoctor will still works & links can be clicked
+include::general.adoc[leveloffset=+1]
+include::static-site-generator.adoc[leveloffset=+1]
+
+// TODO: specific pages
+
+include::glossary.adoc[]

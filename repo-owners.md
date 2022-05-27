@@ -11,6 +11,7 @@ Smart contracts: Fraser
 
 DevOps: Lee
 - danalib, CI-CD
+- Maeserat
 
 Audit: Quinn
 - audit
@@ -23,7 +24,6 @@ Apps team: Nick
 - Code: Stats, Danaswap and ardana-dollar, dana-circulating-supply, DanaSwapUI,
   orbis website
 - Docs: apps-team
-- Infra: Maeserat
 
 
 

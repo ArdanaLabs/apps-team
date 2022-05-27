@@ -1,0 +1,43 @@
+Accessibility
+=============
+
+== Avoid overriding user agent defaults
+
+* unless in an application or a context where content will be lost, do *not* open links with `target="_blank"` (https://css-tricks.com/use-target_blank/[more info])
+
+== Respect user request and requirements
+
+* provide an experience tailored to mobile devices and small windows as well as large (do *not* make wild assumptions based on screen size: a small window is not mobile, a large window do not always have pointers, etc.)
+* respect users wishing for reduced motion
+* provide an quick experience for users on slow networks (and those that request reduced data)
+* respect a user agent’s requested language when possible
+* provide necessary ARIA when building custom components
+
+== Logical DOM order
+
+* The DOM and the design are not the same thing. The DOM should flow in a logical order
+
+TIP: An easy way to test this is in a Gecko-based browser go to *View → Page Style → No style* which will disable the page styles to let you see how the elements are layed out
+
+== Error handling
+
+* handle errors with useful, actionable error messages
+
+TIP: We can use data modeling to ensure errors are handled
+
+== Noscript
+
+* informational pages should be mostly, if not fully, accessibly without JavaScript; this helps users in TUI browser, with script blockers, and most importantly with search engines that aren’t as sophisticated to index the page
+* dynamic content pages should include message about the progressive enhancements they are missing
+* the `<noscript>` experience should be tailored to the component or product as a whole and *not* just say a generic: This page requires JavaScript
+
+TIP: As a good practice, any informational-style site should be built first with noscript principles of pure HTML and CSS with JavaScript as an enhancement because this will generally lead to a simpler design. Be reasonable and do not take this concept too far though; don’t start reaching checkbox hacks or similar just to avoid JavaScript
+
+== SEO
+
+* related to the Noscript category, informational pages need to be easy to index for all major search engines
+* especially with informational pages, microdata should be provided to get a better experience from the search results (and likely a better ranking)
+* have metadata for social sharing (images, descriptions, etc.)
+* all `<img>`s should have `alt` tags; they should be informative *or* are empty for “decorative images” (i.e. `<img alt="">`), they should *not* say what the image is of
+** Read more: https://www.w3.org/WAI/tutorials/images/decorative/
+* text should match the casing for written English (or whatever document languague); if an uppercase, small-caps or lowercase aesthetic is desired, use CSS

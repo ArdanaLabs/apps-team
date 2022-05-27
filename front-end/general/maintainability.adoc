@@ -1,0 +1,11 @@
+Maintainability
+===============
+
+== Use the appropriate tools
+
+* informational pages should be easy to edit for anyone with little prior knowledge of the stack of the specific stack
+* dynamic pages should not be difficult to edit for the back-end team and programmers from other languages
+
+== Include comments and documentation
+
+* documentation will help other (and your future self) understand any tricky or confusing code

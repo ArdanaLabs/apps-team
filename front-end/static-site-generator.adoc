@@ -1,0 +1,25 @@
+Static Site Generator Criteria
+==============================
+:doctype: article
+:description: Criteria for all statically-hosted pages
+:sectnums:
+:toc:
+:toclevels: 2
+:webfonts!:
+
+Static site generator can automate adding ‘dynamic’ content to static pages (and sometimes assets too) as well as help users create pages that can be hosted on a CDN. Because of the nature of how static pages are maintained over a long period of time, generally host content that is seldom updated that when updates are required need to happen with quick turnaround, and content editors may come from any vaguely-technical background (not a specific one), a static site generator require different features than other front-end software.
+
+Good static site generator and its workflow should::
+* Be a static binary that’s straightforward to fetch a specific version
+* Respect for backward compatibility and/or a staying with an old version for possibly years
+* Be extensible with pipeline, plugins, etc.
+* Be simple and let content authors focus on writing, and code maintiners to aim at the simple building blocks of front-end: HTML + CSS + JS (e.g. *not* built around something esoteric like JSX)
+* Require little code to generally use—and all code (such as plugins) should be hosted inside the repository (or in the org’s repository) so that they can always be fetched and used (this means plugins *not* reliant on an external package manager (aside Nix) as these tend to not work over time)
+* Be able to be used with other existing tools (i.e. calling `pandoc` (or any other CLI tool) to render a document (a lot of tools have indirection that wrap around these tools instead of letting you call it directly with the current CLI tool’s arguments/features; and this wrapper tends to go out of date and be brittle in the long-term))
+* Be able to create feeds from the content like RSS, Atom, etc.
+* Have decent documentation and a working example, such as a blog, to draw inspiration
+* Prefer getting values from the content over front matter (front matter breaks the original document format)
+* Probably not require building the static generator binary
+* Not focus solely on building blogs
+* Not be limited to only Markdown + HTML (Pug, AsciiDoc, LaTeX, etc. can be your friends)
+* Not require a masters in category theory to use (e.g. content editors should *not* be required to know Haskell or Stack to tweak the system or make a new page/post).
