@@ -44,7 +44,39 @@ A haskell server which allows to remotely call cardano-library functions that ar
 Since CTL brings the PAB to the browser it implies that all operations that could be computationally intense are moved to the browser, while the base information for these computations are fetched from a remote server.
 
 What I mean by that is that we have a lot of operations that would possibly run faster on a remote server running in the browser (e.g. transaction balancing, data processing for updating datums). And the basis for these computations (e.g. a wallets utxo) is data that needs to be fetched from a remote server (cardano-node, datum-server and other services). This location separation also requires more network traffic than having them on the same machine.
-If we avoid computationally intense operations in the CTL endpoints by e.g. having services for all those complex computations, we actually achieve a much more modular architecture. We create services for all these complex computations instead of doing them in the contract handler. That way the contract handler is just responsible for balancing, signing and submitting and nothing more.
+If we avoid computationally intense operations in the CTL endpoints by e.g. having services for all those complex computations, we actually achieve a much more modular architecture. We create services for all these complex computations instead of doing them in the contract handler. That way the contract handler is just responsible for distributing work, collecting results, balancing, signing and submitting and nothing more.
+
+#### PAB vs CTL
+
+##### PAB
+
+###### Pros
+
+- Unit test using emulator traces
+- Property tests using contract models
+- Lots of docs, Plutus Pioneer Program
+
+###### Cons
+
+- Contract monad forces us to do all the computations for the client.
+- Endpoints create additional complexity.
+- Not maintained.
+
+##### CTL
+
+###### Pros
+
+- CTL role is simpified to wallet oriented operations.
+- Basic contract monad-like construction of transactions using lookups and contraints (we could implement hello-world).
+- It does not deviate much from the PAB contract model
+- Actively maintained.
+
+###### Cons
+
+- Backend service depedencies.
+- Run-time dependency on Wallet APIs.
+- Testing is dependent on backend services.
+- Ogmios is under-documented
 
 ## Our Questions
  - Building Plutus smart contract transactions with a datum (can we also use non-unit redeemers?)
