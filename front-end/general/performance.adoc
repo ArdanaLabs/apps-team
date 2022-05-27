@@ -1,0 +1,39 @@
+Performance
+===========
+
+== Asset optimization
+
+=== Compression
+
+* for all static content, will be compressed with https://en.wikipedia.org/wiki/Brotli[Brotli] and https://en.wikipedia.org/wiki/Gzip[GZip] compression (if Brotli isn’t provided by our CDN, bug them until they do because browser support has existed across the board for years)
+
+=== Hashing
+
+* In the context of hosting on a CDN where accessesing headers and invalidating cache is difficult, it’s easiest to manage caching behavior by adding a hash to the file name and referencing the file by this hash to more easily override the caching behavior
+
+=== Minification
+
+* all scripts should be minified; mangling is also prefered
+* all styles should be minified; selectors and media queries should be combined using a tool
+* images should be compressed and used the best format for the job (however, not all information should be blindly stripped such as color profile and license information)
+
+=== Audio/video formats
+
+* prefer vector/scalable graphics to raster graphics in most cases as they are usually smaller and scale to all screen sizes
+* provide optimized image/video formats (i.e. `*.avif`, `*.jxl`, `*.webp`, `*.jp(2|x)`) 
+** the “best” image type is on a case-by-case basis as images contents wildly affect the file size, but also some file types decode faster, some have such small support that the extra markup isn’t worth it, etc.
+** especially images with small dimensions, older formats can often times be better
+* provide fallback image/video formats with broad support (i.e. `*.jpg`, `*.png`) and prefering at least one level of progressive decoding
+
+== Prefetch
+
+* provide `preload` or `prefetch` or `modulepreload` headers/links for often-used or guaranteed to be needed assets
+* provide `preconnect` or `dns-prefetch` headers/links for all remote servers connected to
+
+== Deferred loading
+
+* ‘lazily’ load and defer assets when possible (e.g. `<img loading="lazy">`, `<script defer>`)
+
+== Loading indicators
+
+* pages will have a visually interesting and attractive loading spinner/throbber while loading content; a good spinner is distracting/mesmerizing enough that a user’s perceived performance is higher with than without
