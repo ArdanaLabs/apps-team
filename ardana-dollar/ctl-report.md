@@ -29,21 +29,25 @@ A haskell server which allows to remotely call cardano-library functions that ar
  - Support for browsers other than chromium based browsers.
 
 ### Open questions CTLs Developers are asking themselves which could be interesting for us
-- A lingering concern remains around storage solutions, if needed. This can be in memory, in various browser storage solutions, or a decentralized DB like Flure
+ - A lingering concern remains around storage solutions, if needed. This can be in memory, in various browser storage solutions, or a decentralized DB like Flure
 
 ### Possible Technical Debt
  - Third party `ogmios-datum-cache` is maintained by mlabs to allow for querying datum.
     - This could be a source of race-conditions.
     - Needs to be maintained by the infrastructure team.
- - Nami extensions need to be installed manually.
+ - The Nami extension needs to be installed manually.
     - This could imply that we will need a team for manual testing.
- - Testing the project requires nodejs e.g. `npm run unit-test`.
+    - EDIT: using home-manager we can add chromium having nami installed already
+ - We need a way to programatically interact with the nami extension
+    - We need to use selenium to automate the user interaction with this extension.
  - Reliance on docker creates a Nix impurity.
+    - Not necessarily an impurity, the docker images are built using nix
+    - However we need a docker daemon running on the system
 
 ### Architectural implications for dUSD
 Since CTL brings the PAB to the browser it implies that all operations that could be computationally intense are moved to the browser, while the base information for these computations are fetched from a remote server.
 
-What I mean by that is that we have a lot of operations that would possibly run faster on a remote server running in the browser (e.g. transaction balancing, data processing for updating datums). And the basis for these computations (e.g. a wallets utxo) is data that needs to be fetched from a remote server (cardano-node, datum-server and other services). This location separation also requires more network traffic than having them on the same machine.
+What I mean by that is that we have a lot of operations that would possibly run faster on a remote server, now running in the browser (e.g. transaction balancing, data processing for updating datums). And the basis for these computations (e.g. a wallets utxo) is data that needs to be fetched from a remote server (cardano-node, datum-server and other services). This location separation also requires more network traffic than having them on the same machine.
 If we avoid computationally intense operations in the CTL endpoints by e.g. having services for all those complex computations, we actually achieve a much more modular architecture. We create services for all these complex computations instead of doing them in the contract handler. That way the contract handler is just responsible for distributing work, collecting results, balancing, signing and submitting and nothing more.
 
 #### PAB vs CTL
@@ -58,7 +62,7 @@ If we avoid computationally intense operations in the CTL endpoints by e.g. havi
 
 ###### Cons
 
-- Contract monad forces us to do all the computations for the client.
+- Contract monad forces us to do all the computations for the client. We can't do any IO inside the contract monad. In the case of the price-feeder: we can't call the price-fetcher in the contract handler and then publish the price. Instead our script fetches a price and calls the contract handler requesting the price change.
 - Endpoints create additional complexity.
 - Not maintained.
 
@@ -73,14 +77,14 @@ If we avoid computationally intense operations in the CTL endpoints by e.g. havi
 
 ###### Cons
 
-- Backend service depedencies.
+- Backend service (runtime) depedencies.
 - Run-time dependency on Wallet APIs.
 - Testing is dependent on backend services.
 - Ogmios is under-documented
 
 ## Our Questions
  - Building Plutus smart contract transactions with a datum (can we also use non-unit redeemers?)
- - Is there a ready-to-use local testing environment?
+ - Is there a ready-to-use local testing environment?j
  - How does plutarch integrate into this?
  - Are there plans to move docker-compose managed service dependencies into the Nix flake?
  - What is the proper way to test ctl contracts?
