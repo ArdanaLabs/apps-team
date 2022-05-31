@@ -45,9 +45,11 @@ A haskell server which allows to remotely call cardano-library functions that ar
     - However we need a docker daemon running on the system
 
 ### Architectural implications for dUSD
+
 Since CTL brings the PAB to the browser it implies that all operations that could be computationally intense are moved to the browser, while the base information for these computations are fetched from a remote server.
 
 What I mean by that is that we have a lot of operations that would possibly run faster on a remote server, now running in the browser (e.g. transaction balancing, data processing for updating datums). And the basis for these computations (e.g. a wallets utxo) is data that needs to be fetched from a remote server (cardano-node, datum-server and other services). This location separation also requires more network traffic than having them on the same machine.
+
 If we avoid computationally intense operations in the CTL endpoints by e.g. having services for all those complex computations, we actually achieve a much more modular architecture. We create services for all these complex computations instead of doing them in the contract handler. That way the contract handler is just responsible for distributing work, collecting results, balancing, signing and submitting and nothing more.
 
 #### PAB vs CTL
@@ -83,9 +85,10 @@ If we avoid computationally intense operations in the CTL endpoints by e.g. havi
 - Ogmios is under-documented
 
 ## Our Questions
+([See meeting notes](ctl/mlabs-meeting.md))
  - Building Plutus smart contract transactions with a datum (can we also use non-unit redeemers?)
- - Is there a ready-to-use local testing environment?j
+ - Is there a ready-to-use local testing environment?
  - How does plutarch integrate into this?
  - Are there plans to move docker-compose managed service dependencies into the Nix flake?
  - What is the proper way to test ctl contracts?
-   How can we property and unit test?
+ - How can we property and unit test?
