@@ -6,7 +6,7 @@ Monday, May 30th, 2022
 
 - They're releasing V1 this week (5-30-2022)
 - Api should be mostly stable.
-- Over the next month, change will be made to the API and back-ported to V2.
+- Over the next month, changes will be made to the API and back-ported to V2.
 - They’re investigating getting support set for the Vasil hardfork.
 - They want to deprecate some runtime dependencies and simplify the deployments.
 
@@ -15,21 +15,23 @@ Monday, May 30th, 2022
 Haskell server contains functionality that is not currently supported in purescript such as:
 - Calculating fees
 - Supporting parameterized scripts.
-    They don’t have a UPLC (Untyped plutus core) API on the front-end yet so they send the scripts in a serialized form to the backend, and apply them, then send it back to the front-end.
+    They don’t have a UPLC (Untyped plutus core) API on the front-end yet so they send the script in a serialized form to the backend, and apply them, then send it back to the front-end.
 
-They’ve been putting more functionality into the server because they’ve been in a bit of a time crunch. There are projects that need to have CTL working as quickly as possible. The goal is to deprecate the entire server.
+They’ve been putting more functionality into the server because they’ve been in a bit of a time crunch. There are projects that need to have CTL working as quickly as possible.
+
+The goal is to deprecate the entire server.
 
 Ogmios will be used to accommodate some of the server functionality. It can calculate xUnits as well as transaction fees.
 
 ### Datum Cache
 
-They’re all thinking about getting rid of the datum cache after Vasil is rolled out. To do this, you have to make a requirement in your contract that you’re using inline datums and only inline datums.
+They’re thinking about deprecating datum cache after Vasil is rolled out. To do this, you have to make a requirement in your contract that you’re using inline datums and only inline datums.
 
 ### Cardano Node
 
 Deprecation of needing to run you own node is expected for V2.
 
-SPOs (Stake Pool Operators) can run services on a registry. They’re already doing it with the submit API, they want to expand it to a larger suite. So you can load balance across many nodes. 
+SPOs (Stake Pool Operators) can run services on a registry. They’re already doing it with the submit API and want to expand it to a larger suite. This will also allow load balancing across many nodes. 
 
 Vasil nodes have a 4x use regression so it takes 64 gigs of memory to run the node. If this regression isn't resolved quickly, further pressure will be put on sourcing node connections from registries. 
 
@@ -44,16 +46,16 @@ They will be supporting [GeroWallet](https://gerowallet.io/) potentially this we
 - Flint
 
 
-The Vasil fork may break Nami support. With nami you have to serialize, sign, then serialize again. Apparently Vasil nodes will complain.
+The Vasil fork may break Nami support. With nami you have to serialize, sign, then serialize again. Apparently Vasil nodes will have issues with this.
 
 ## E2E Example Project
 
-[`Seabug`](https://github.com/mlabs-haskell/seabug) is the most worked together example. There are a couple bugs in it though. In the project, CTL is brought in as a purescript dependency which is then brought in as an SDK, which is then used in the front-end project to consume as a library in typescript.
+[`Seabug`](https://github.com/mlabs-haskell/seabug) is the most worked together example. There are a couple bugs in it though. In the project, CTL is brought in as a purescript dependency to the application's purescript code. This code is then compiled into a JS SDK which is used by a react app for the front-end's contract interactions.
 
 ## Plutus in CTL
 
 Hardcoded scripts are fed into the front-end as a build-time configuration.
-There is a CTL contracts repo that is private, that they’ll be open-sourcing the next couple days.
+There is a private CTL contracts repo that they’ll be open-sourcing the next couple days.
 
 ## Testing
 
@@ -78,7 +80,7 @@ There are limits on parallelism in Plutip because you need to involve a real cha
 
 Websocket reliability is going to be an ongoing issue. They have washers on both ends of the websockets to make sure they’re not silently failing. 
 
-Ogmios is the only horse in town that satisfies the websocket requirement. If Ogmios starts supporting an HTTP interface, those reliability issues will fall in favor of slower connections. There is a lot of back and forth between Ogmios
+Ogmios is the only chain API that satisfies the websocket requirement. If Ogmios starts supporting an HTTP interface, those reliability issues will fall in favor of slower connections. There is a lot of back and forth between Ogmios
 E2E testing in the next two weeks should be done with Selenium or Puppeteer.
 
 
