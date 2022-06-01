@@ -31,7 +31,7 @@ Note that a UTxO can also contain a datum hash. This is used to represent state 
 
 ### Simple Minting Policies
 
-Minting policies are the means through which tokens are created and destroyed. A simple minting policy specifies who's signature is used when minting and burning tokens managed by that policy. This is specified by providing one or more verification keys corresponding to users.
+Minting policies are the means through which tokens are created and destroyed. A simple minting policy specifies whose signature is used when minting and burning tokens managed by that policy. This is specified by providing one or more verification keys corresponding to users.
 
 To mint tokens, the issuer submits a transaction which specifies the minting policy and the quantity of the tokens in the policy that they want to mint. The outputs of the transaction must then contain the value of the tokens created and the address they want to send the tokens. This results in a UTxO containing the newly minted tokens. 
 
@@ -89,14 +89,14 @@ Let's say we want to create a minting policy that enforces a one to one collater
 While we've covered enough to build a practical understanding of minting policies and validator scripts, what's possible with them has yet to be fully explored. With the Vasil hard-fork and the inclusion of reference inputs, inline datums, and script references, the framework becomes more accessible and performant opening up further possibilities.     
 
 
-<!-- 
-## Stateful Minting
 
-Let's say we want to have a minting policy that will stop minting after a certain quantity is reached and is only callable by an user who owns a certain NFT, let's call it the issuer NFT. For us to do this, we need a way to track how many tokens have been minted in prior transactions so that we can apply the limit in the minting policy validator. To accomplish this, we'll need to write a minting policy validator that fulfills the following requirements.
+<!-- ## Stateful Minting
+
+Let's say we want to have a minting policy that will stop minting after a certain quantity is reached and is only callable by a user who owns a certain NFT, called the issuer NFT. For us to do this, we need a way to track how many tokens have been minted in prior transactions so that we can apply the limit in the minting policy validator. To accomplish this, we'll need the following components.
 
 ### State UTxO
 
-To provide state to a minting policy, we'll need a plutus scripting UTxO which houses the quantity of tokens that have been minted to inform the minting policy validator. The validator for this UTxO will receive this quantity as it's datum, and  
+To provide state to a minting policy, we'll need a scripting UTxO which records the quantity of tokens that have been minted in the datum and validates  
 
 
 ### NFT UTxOs
